@@ -13,10 +13,10 @@ func TestAdd(t *testing.T) {
 
 	activity := &watcher.ActivityPool{}
 
-	activity.Add(make(chan bool))
+	activity.Add(make(chan struct{}))
 	r.Equal(len(activity.Activities), 1)
 
-	activity.Add(make(chan bool))
+	activity.Add(make(chan struct{}))
 	r.Equal(len(activity.Activities), 2)
 }
 
@@ -24,9 +24,9 @@ func TestDeactivateAll(t *testing.T) {
 	r := require.New(t)
 
 	activity := &watcher.ActivityPool{}
-	activity.Activities = []chan bool{
-		make(chan bool, 1),
-		make(chan bool, 1),
+	activity.Activities = []chan struct{}{
+		make(chan struct{}, 1),
+		make(chan struct{}, 1),
 	}
 
 	activity.DeactivateAll()

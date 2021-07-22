@@ -15,17 +15,24 @@ before submitting one. Thank you!
 
 --> Comming soon
 
-### Building from source
+### Building from source and Run Damon
 
-Make sure you have your go environment setup and run:
+Make sure you have your go environment setup:
 
 1. Clone the project
-1. Run `$ make build` 
-1. Run `$ make run`
+1. Run `$ make build` to build the binary
+1. Run `$ make run` to run the binary
+1. You can use `$ make install-osx` on a Mac to cp the binary to `/usr/local/bin/damon`
+
+or
+
+```
+$ go install ./cmd/damon
+```
 
 ### How to use it
 
-Once `Damon` is installed, simply run:
+Once `Damon` is installed and avialable in your path, simply run:
 
 ```
 $ damon

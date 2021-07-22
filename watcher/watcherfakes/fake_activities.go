@@ -8,10 +8,10 @@ import (
 )
 
 type FakeActivities struct {
-	AddStub        func(chan bool)
+	AddStub        func(chan struct{})
 	addMutex       sync.RWMutex
 	addArgsForCall []struct {
-		arg1 chan bool
+		arg1 chan struct{}
 	}
 	DeactivateAllStub        func()
 	deactivateAllMutex       sync.RWMutex
@@ -21,10 +21,10 @@ type FakeActivities struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeActivities) Add(arg1 chan bool) {
+func (fake *FakeActivities) Add(arg1 chan struct{}) {
 	fake.addMutex.Lock()
 	fake.addArgsForCall = append(fake.addArgsForCall, struct {
-		arg1 chan bool
+		arg1 chan struct{}
 	}{arg1})
 	stub := fake.AddStub
 	fake.recordInvocation("Add", []interface{}{arg1})
@@ -40,13 +40,13 @@ func (fake *FakeActivities) AddCallCount() int {
 	return len(fake.addArgsForCall)
 }
 
-func (fake *FakeActivities) AddCalls(stub func(chan bool)) {
+func (fake *FakeActivities) AddCalls(stub func(chan struct{})) {
 	fake.addMutex.Lock()
 	defer fake.addMutex.Unlock()
 	fake.AddStub = stub
 }
 
-func (fake *FakeActivities) AddArgsForCall(i int) chan bool {
+func (fake *FakeActivities) AddArgsForCall(i int) chan struct{} {
 	fake.addMutex.RLock()
 	defer fake.addMutex.RUnlock()
 	argsForCall := fake.addArgsForCall[i]

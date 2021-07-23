@@ -9,6 +9,11 @@ Please take a look at the Damon [project board](https://github.com/hashicorp/dam
 If you find a bug or you have great ideas how Damon can be improved feel free to open an issue. To avoid duplicates, please check the [project board](https://github.com/hashicorp/damon/projects/2) 
 before submitting one. Thank you!
 
+## Screenshot
+
+![image](https://user-images.githubusercontent.com/82210389/126840047-dd96be77-f7fc-4903-972a-c783cc615a33.png)
+
+
 ## Installation
 
 ### Brew

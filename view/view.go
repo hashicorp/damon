@@ -26,7 +26,7 @@ type Watcher interface {
 	Unsubscribe()
 
 	SubscribeHandler(handler models.Handler, handle func(string, ...interface{}))
-	SubscribeToNamespaces(notify func()) error
+	SubscribeToNamespaces(notify func())
 	SubscribeToTaskGroups(jobID string, notify func()) error
 	SubscribeToLogs(allocID, source string, notify func())
 

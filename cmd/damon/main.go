@@ -81,7 +81,7 @@ func main() {
 		LogSearch:       logSearch,
 	}
 
-	watcher := watcher.NewWatcher(state, nomadClient)
+	watcher := watcher.NewWatcher(state, nomadClient, refreshIntervalDefault)
 	go watcher.Watch()
 
 	view := view.New(components, watcher, nomadClient, state)

@@ -20,7 +20,7 @@ func (v *View) handleNoResources(text string, args ...interface{}) {
 
 func (v *View) handleError(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	v.components.Error.Render(msg)
+	v.components.Failure.Render(msg)
 	v.Layout.Container.SetFocus(v.components.Failure.Modal.Primitive())
 }
 
@@ -32,6 +32,6 @@ func (v *View) handleInfo(format string, args ...interface{}) {
 
 func (v *View) handleFatal(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	v.components.Failure.Render(msg)
+	v.components.Error.Render(msg)
 	v.Layout.Container.SetFocus(v.components.Error.Modal.Primitive())
 }

@@ -40,6 +40,8 @@ type Watcher struct {
 
 	forceUpdate chan api.Topic
 	activities  Activities
+
+	interval time.Duration
 }
 
 type subscriber struct {
@@ -47,13 +49,14 @@ type subscriber struct {
 	notify func()
 }
 
-func NewWatcher(state *state.State, nomad *nomad.Nomad) *Watcher {
+func NewWatcher(state *state.State, nomad Nomad, interval time.Duration) *Watcher {
 	return &Watcher{
 		state:       state,
 		nomad:       nomad,
 		handlers:    map[models.Handler]func(ms string, args ...interface{}){},
 		forceUpdate: make(chan api.Topic),
 		activities:  &ActivityPool{},
+		interval:    interval,
 	}
 }
 
@@ -86,16 +89,16 @@ func (w *Watcher) SubscribeHandler(handler models.Handler, handle func(string, .
 
 // NotifyHandler notifies a handler that an event occurred
 // on the topic it subscribed for.
-func (w *Watcher) NotifyHandler(handler models.Handler, msg string) {
+func (w *Watcher) NotifyHandler(handler models.Handler, msg string, args ...interface{}) {
 	if _, ok := w.handlers[handler]; ok {
-		w.handlers[handler](msg)
+		w.handlers[handler](msg, args...)
 	}
 }
 
 // Notify notifies the current subscriber on a specific topic (eg Jobs)
 // that data got updated in the state.
 func (w *Watcher) Notify(topic api.Topic) {
-	if w.subscriber != nil || w.subscriber.notify != nil {
+	if w.subscriber != nil && w.subscriber.notify != nil {
 		if w.subscriber.topic == topic {
 			w.subscriber.notify()
 		}
@@ -112,24 +115,30 @@ func (w *Watcher) Watch() {
 		api.TopicAllocation: {"*"},
 	}
 
-	index := uint64(1000)
+	w.update(api.TopicJob)
+	w.update(api.TopicDeployment)
+	w.update(api.TopicAllocation)
 
+	index := uint64(1000)
 	eventCh, err := w.nomad.Stream(topics, index)
 	if err != nil {
-		w.NotifyHandler(models.HandleError, err.Error())
+		w.NotifyHandler(models.HandleFatal, err.Error())
 	}
-
-	w.updateJobs()
-	w.updateDeployments()
 
 	for {
 		select {
-		case event := <-eventCh:
+		case event, open := <-eventCh:
+			if !open {
+				w.NotifyHandler(models.HandleFatal, "event stream closed")
+				return
+			}
+
 			for _, e := range event.Events {
 				w.update(e.Topic)
 			}
 		case topic := <-w.forceUpdate:
 			w.update(topic)
+
 		}
 	}
 }
@@ -181,117 +190,4 @@ func (w *Watcher) updateAllocations() {
 	}
 
 	w.state.Allocations = allocs
-}
-
-// SubscribeToNamespaces starts a goroutine to polls Namespaces every two
-// seconds to update the state. The goroutine will be stopped whenever
-// a new subscription happens.
-func (w *Watcher) SubscribeToNamespaces(notify func()) error {
-	w.updateNamespaces()
-	w.Subscribe(models.TopicNamespace, notify)
-	w.Notify(models.TopicNamespace)
-
-	stop := make(chan struct{})
-	w.activities.Add(stop)
-
-	ticker := time.NewTicker(time.Second * 2)
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				w.updateNamespaces()
-				w.Notify(models.TopicNamespace)
-			case <-stop:
-				return
-			}
-		}
-	}()
-
-	return nil
-}
-
-func (w *Watcher) updateNamespaces() {
-	ns, err := w.nomad.Namespaces(nil)
-	if err != nil {
-		w.NotifyHandler(models.HandleError, err.Error())
-	}
-
-	w.state.Namespaces = ns
-}
-
-// SubscribeToTaskGroups starts a goroutine to polls TaskGroups every two
-// seconds to update the state. The goroutine will be stopped whenever
-// a new subscription happens.
-func (w *Watcher) SubscribeToTaskGroups(jobID string, notify func()) error {
-	w.updateTaskGroups(jobID)
-	w.Subscribe(models.TopicTaskGroup, notify)
-	w.Notify(models.TopicTaskGroup)
-
-	stop := make(chan struct{})
-	w.activities.Add(stop)
-
-	ticker := time.NewTicker(time.Second * 2)
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				w.updateTaskGroups(jobID)
-				w.Notify(models.TopicTaskGroup)
-			case <-stop:
-				return
-			}
-		}
-	}()
-
-	return nil
-}
-
-func (w *Watcher) updateTaskGroups(jobID string) {
-	tg, err := w.nomad.TaskGroups(jobID, nil)
-	if err != nil {
-		w.NotifyHandler(models.HandleError, err.Error())
-	}
-
-	w.state.TaskGroups = tg
-}
-
-// SubscribeToLogs starts an event stream for Logs
-// which updates the state whenever a new log is written.
-// The stream will be stopped whenever a new subscription happens.
-func (w *Watcher) SubscribeToLogs(allocID, source string, notify func()) {
-	w.state.Logs = nil
-
-	w.Subscribe(models.TopicLog, notify)
-
-	w.Notify(models.TopicLog)
-	alloc := w.getAllocation(allocID)
-
-	cancel := make(chan struct{})
-	streamCh, errorCh := w.nomad.Logs(allocID, alloc.TaskNames[0], source, cancel)
-
-	w.activities.Add(cancel)
-
-	go func() {
-		for {
-			select {
-			case frame := <-streamCh:
-				w.state.Logs = append(w.state.Logs, frame.Data...)
-				w.Notify(models.TopicLog)
-			case err := <-errorCh:
-				w.NotifyHandler(models.HandleError, err.Error())
-			case <-cancel:
-				return
-			}
-		}
-	}()
-}
-
-func (w *Watcher) getAllocation(id string) *models.Alloc {
-	for _, a := range w.state.Allocations {
-		if a.ID == id {
-			return a
-		}
-	}
-
-	return nil
 }

@@ -143,6 +143,7 @@ func (v *View) Init(version string) {
 	}
 
 	v.Watcher.SubscribeHandler(models.HandleError, v.handleError)
+	v.Watcher.SubscribeHandler(models.HandleFatal, v.handleFatal)
 
 	stop := make(chan struct{})
 

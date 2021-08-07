@@ -15,6 +15,7 @@ func NewModal(title string, buttons []string, c tcell.Color) *Modal {
 	m.SetTitle(title)
 	m.SetTitleAlign(tview.AlignCenter)
 	m.SetBackgroundColor(c)
+	m.SetTextColor(tcell.ColorBlack)
 	m.AddButtons(buttons)
 
 	f := tview.NewFlex().
@@ -37,6 +38,10 @@ func (m *Modal) SetDoneFunc(handler func(buttonIndex int, buttonLabel string)) {
 
 func (m *Modal) SetText(text string) {
 	m.primitive.SetText(text)
+}
+
+func (m *Modal) SetFocus(index int) {
+	m.primitive.SetFocus(index)
 }
 
 func (m *Modal) Container() tview.Primitive {

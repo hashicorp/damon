@@ -20,6 +20,8 @@ github.com/hashicorp/go-rootcerts v1.0.2 h1:jzhAVGtqPKbwpyCPELlgNWhE1znq+qwJtW5O
 github.com/hashicorp/go-rootcerts v1.0.2/go.mod h1:pqUvnprVnM5bf7AOirdbb01K4ccR319Vf4pU3K5EGc8=
 github.com/hashicorp/nomad/api v0.0.0-20210709134434-c4e0355775f3 h1:BOBoGSnaNSLtMVDjwMbH9yW40COa8QLOr16dc0IKBns=
 github.com/hashicorp/nomad/api v0.0.0-20210709134434-c4e0355775f3/go.mod h1:vYHP9jMXk4/T2qNUbWlQ1OHCA1hHLil3nvqSmz8mtgc=
+github.com/hashicorp/nomad/api v0.0.0-20210804153318-c67b69bd0cc6 h1:kqVyRGdvPCQ3pIgZBvu7ISJZCELxkgSg5qrPO893sLc=
+github.com/hashicorp/nomad/api v0.0.0-20210804153318-c67b69bd0cc6/go.mod h1:vYHP9jMXk4/T2qNUbWlQ1OHCA1hHLil3nvqSmz8mtgc=
 github.com/jessevdk/go-flags v1.5.0 h1:1jKYvbxEjfUl0fmqTCOfonvskHHXMjBySTLW4y9LFvc=
 github.com/jessevdk/go-flags v1.5.0/go.mod h1:Fw0T6WPc1dYxT4mKEZRfG5kJhaTDP9pj1c2EWnYs/m4=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=

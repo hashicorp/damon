@@ -12,6 +12,7 @@ import (
 
 	"github.com/hcjulz/damon/nomad"
 	"github.com/hcjulz/damon/state"
+	"github.com/hcjulz/damon/styles"
 	"github.com/hcjulz/damon/view"
 	"github.com/hcjulz/damon/watcher"
 
@@ -62,6 +63,12 @@ func main() {
 	errorComp := component.NewError()
 	info := component.NewInfo()
 	failure := component.NewInfo()
+	confirm := component.NewModal(
+		"confirm",
+		"confirm",
+		[]string{"cancel", "confirm"},
+		styles.TcellColorAttention,
+	)
 
 	components := &view.Components{
 		ClusterInfo:     clusterInfo,
@@ -79,6 +86,7 @@ func main() {
 		Info:            info,
 		Failure:         failure,
 		LogSearch:       logSearch,
+		Confirm:         confirm,
 	}
 
 	watcher := watcher.NewWatcher(state, nomadClient, refreshIntervalDefault)

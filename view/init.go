@@ -142,6 +142,8 @@ func (v *View) Init(version string) {
 		v.GoBack()
 	}
 
+	v.components.Confirm.Bind(v.Layout.Pages)
+
 	v.Watcher.SubscribeHandler(models.HandleError, v.handleError)
 	v.Watcher.SubscribeHandler(models.HandleFatal, v.handleFatal)
 

@@ -51,8 +51,10 @@ func (n *Nomad) GetJob(jobID string) (*api.Job, error) {
 }
 
 func (n *Nomad) StartJob(job *api.Job) error {
-	_, _, err := n.JobClient.Register(job, nil)
+	stop := false
+	job.Stop = &stop
 
+	_, _, err := n.JobClient.Register(job, nil)
 	return err
 }
 

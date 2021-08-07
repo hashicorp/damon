@@ -3,6 +3,7 @@ package view
 import (
 	"regexp"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/hashicorp/nomad/api"
 	"github.com/rivo/tview"
 
@@ -84,10 +85,6 @@ func (v *View) filterJobs() []*models.Job {
 	return data
 }
 
-func (v *View) viewSwitch() {
-	v.resetSearch()
-}
-
 func (v *View) namespaceFilterJobs() []*models.Job {
 	rx, _ := regexp.Compile(v.state.SelectedNamespace)
 	result := []*models.Job{}
@@ -98,4 +95,79 @@ func (v *View) namespaceFilterJobs() []*models.Job {
 		}
 	}
 	return result
+}
+
+func (v *View) inputJobs(event *tcell.EventKey) *tcell.EventKey {
+	if event == nil {
+		return event
+	}
+
+	switch event.Key() {
+	case tcell.KeyCtrlS:
+		jobID := v.components.JobTable.GetIDForSelection()
+		v.startStopJob(jobID)
+	case tcell.KeyRune:
+		switch event.Rune() {
+		case 't':
+			if v.Layout.Footer.HasFocus() || v.components.Search.InputField.Primitive().HasFocus() {
+				return event
+			}
+
+			jobID := v.components.JobTable.GetIDForSelection()
+			v.TaskGroups(jobID)
+
+		case '/':
+			if !v.Layout.Footer.HasFocus() {
+				if !v.state.Toggle.Search {
+					v.state.Toggle.Search = true
+					v.Search()
+				} else {
+					v.Layout.Container.SetFocus(v.components.Search.InputField.Primitive())
+				}
+				return nil
+			}
+		}
+
+	}
+
+	return event
+}
+
+func (v *View) startStopJob(jobID string) {
+	job, err := v.Client.GetJob(jobID)
+	if err != nil {
+		v.handleError("failed to start/stop job: %s", err.Error())
+		return
+	}
+
+	if *job.Status == "dead" {
+		v.components.Confirm.Props.Done = func(index int, text string) {
+			if index == 1 {
+				err := v.Client.StartJob(job)
+				v.err(err, "Failed to start job")
+			}
+
+			v.closeConfirmModal()
+		}
+
+		v.components.Confirm.Render("Do you really want to start the job?")
+	} else {
+		v.components.Confirm.Props.Done = func(index int, text string) {
+			if index == 1 {
+				err := v.Client.StopJob(jobID)
+				v.err(err, "Failed to stop job")
+			}
+
+			v.closeConfirmModal()
+		}
+
+		v.components.Confirm.Render("Do you really want to stop the job?")
+	}
+
+	v.Layout.Container.SetFocus(v.components.Confirm.Modal.Primitive())
+}
+
+func (v *View) closeConfirmModal() {
+	v.Layout.Pages.RemovePage(v.components.Confirm.Props.ID)
+	v.Layout.Container.SetFocus(v.state.Elements.TableMain)
 }

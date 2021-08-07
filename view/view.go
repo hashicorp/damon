@@ -64,6 +64,7 @@ type Components struct {
 	LogStream       *component.Logger
 	LogSearch       *component.SearchField
 	Search          *component.SearchField
+	Confirm         *component.GenericModal
 }
 
 func New(components *Components, watcher Watcher, client Client, state *state.State) *View {
@@ -145,4 +146,8 @@ func (v *View) addToHistory(ns string, topic api.Topic, update func()) {
 		index := getNamespaceNameIndex(ns, v.state.Namespaces)
 		v.state.Elements.DropDownNamespace.SetCurrentOption(index)
 	})
+}
+
+func (v *View) viewSwitch() {
+	v.resetSearch()
 }

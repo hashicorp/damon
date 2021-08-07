@@ -85,3 +85,91 @@ func TestJobs(t *testing.T) {
 		r.Contains(err.Error(), "failed to retrieve job list")
 	})
 }
+
+func TestStartJob(t *testing.T) {
+	r := require.New(t)
+
+	fakeJobClient := &nomadfakes.FakeJobClient{}
+	client := &nomad.Nomad{JobClient: fakeJobClient}
+
+	t.Run("When everything is fine", func(t *testing.T) {
+		fakeJobClient.RegisterReturns(&api.JobRegisterResponse{}, &api.WriteMeta{}, nil)
+
+		id := "test"
+		job := api.Job{ID: &id}
+		err := client.StartJob(&job)
+		r.NoError(err)
+
+		actualJob, writeOpts := fakeJobClient.RegisterArgsForCall(0)
+
+		r.Equal(actualJob, &job)
+		r.Nil(writeOpts)
+	})
+
+	t.Run("When the client is failing", func(t *testing.T) {
+		fakeJobClient.RegisterReturns(nil, nil, errors.New("argh"))
+
+		id := "test"
+		job := api.Job{ID: &id}
+		err := client.StartJob(&job)
+
+		r.Error(err)
+		r.EqualError(err, "argh")
+	})
+}
+
+func TestStopJob(t *testing.T) {
+	r := require.New(t)
+
+	fakeJobClient := &nomadfakes.FakeJobClient{}
+	client := &nomad.Nomad{JobClient: fakeJobClient}
+
+	t.Run("When everything is fine", func(t *testing.T) {
+		fakeJobClient.DeregisterReturns("test", &api.WriteMeta{}, nil)
+
+		err := client.StopJob("test")
+		r.NoError(err)
+
+		actualJobID, purge, writeOpts := fakeJobClient.DeregisterArgsForCall(0)
+
+		r.Equal(actualJobID, "test")
+		r.False(purge)
+		r.Nil(writeOpts)
+	})
+
+	t.Run("When the client is failing", func(t *testing.T) {
+		fakeJobClient.DeregisterReturns("", nil, errors.New("argh"))
+
+		err := client.StopJob("test")
+		r.Error(err)
+		r.EqualError(err, "argh")
+	})
+}
+
+func TestGetJob(t *testing.T) {
+	r := require.New(t)
+
+	fakeJobClient := &nomadfakes.FakeJobClient{}
+	client := &nomad.Nomad{JobClient: fakeJobClient}
+
+	t.Run("When everything is fine", func(t *testing.T) {
+		id := "test"
+		fakeJobClient.InfoReturns(&api.Job{ID: &id}, nil, nil)
+		job, err := client.GetJob("test")
+		r.NoError(err)
+
+		actualJobID, queryOptions := fakeJobClient.InfoArgsForCall(0)
+
+		r.Equal(actualJobID, "test")
+		r.Equal(*job.ID, "test")
+		r.Nil(queryOptions)
+	})
+
+	t.Run("When the client is failing", func(t *testing.T) {
+		fakeJobClient.InfoReturns(nil, nil, errors.New("argh"))
+
+		_, err := client.GetJob("test")
+		r.Error(err)
+		r.EqualError(err, "argh")
+	})
+}

@@ -34,6 +34,11 @@ type FakeModal struct {
 	setDoneFuncArgsForCall []struct {
 		arg1 func(buttonIndex int, buttonLabel string)
 	}
+	SetFocusStub        func(int)
+	setFocusMutex       sync.RWMutex
+	setFocusArgsForCall []struct {
+		arg1 int
+	}
 	SetTextStub        func(string)
 	setTextMutex       sync.RWMutex
 	setTextArgsForCall []struct {
@@ -181,6 +186,38 @@ func (fake *FakeModal) SetDoneFuncArgsForCall(i int) func(buttonIndex int, butto
 	return argsForCall.arg1
 }
 
+func (fake *FakeModal) SetFocus(arg1 int) {
+	fake.setFocusMutex.Lock()
+	fake.setFocusArgsForCall = append(fake.setFocusArgsForCall, struct {
+		arg1 int
+	}{arg1})
+	stub := fake.SetFocusStub
+	fake.recordInvocation("SetFocus", []interface{}{arg1})
+	fake.setFocusMutex.Unlock()
+	if stub != nil {
+		fake.SetFocusStub(arg1)
+	}
+}
+
+func (fake *FakeModal) SetFocusCallCount() int {
+	fake.setFocusMutex.RLock()
+	defer fake.setFocusMutex.RUnlock()
+	return len(fake.setFocusArgsForCall)
+}
+
+func (fake *FakeModal) SetFocusCalls(stub func(int)) {
+	fake.setFocusMutex.Lock()
+	defer fake.setFocusMutex.Unlock()
+	fake.SetFocusStub = stub
+}
+
+func (fake *FakeModal) SetFocusArgsForCall(i int) int {
+	fake.setFocusMutex.RLock()
+	defer fake.setFocusMutex.RUnlock()
+	argsForCall := fake.setFocusArgsForCall[i]
+	return argsForCall.arg1
+}
+
 func (fake *FakeModal) SetText(arg1 string) {
 	fake.setTextMutex.Lock()
 	fake.setTextArgsForCall = append(fake.setTextArgsForCall, struct {
@@ -222,6 +259,8 @@ func (fake *FakeModal) Invocations() map[string][][]interface{} {
 	defer fake.primitiveMutex.RUnlock()
 	fake.setDoneFuncMutex.RLock()
 	defer fake.setDoneFuncMutex.RUnlock()
+	fake.setFocusMutex.RLock()
+	defer fake.setFocusMutex.RUnlock()
 	fake.setTextMutex.RLock()
 	defer fake.setTextMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

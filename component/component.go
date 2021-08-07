@@ -69,6 +69,7 @@ type Modal interface {
 	Primitive
 	SetDoneFunc(handler func(buttonIndex int, buttonLabel string))
 	SetText(text string)
+	SetFocus(index int)
 	Container() tview.Primitive
 }
 

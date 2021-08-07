@@ -24,6 +24,7 @@ var (
 		fmt.Sprintf("\n%sJob Commands:", styles.HighlightSecondaryTag),
 		fmt.Sprintf("%s<Enter>%s to display allocations", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<t>%s to display TaskGroups for a Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<ctrl-s>%s start/stop a Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s</>%s apply filter", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 

@@ -53,6 +53,7 @@ type SearchOptions struct {
 }
 
 type Nomad struct {
+	nomad         *api.Client
 	Client        Client
 	EventsClient  EventsClient
 	JobClient     JobClient
@@ -81,6 +82,7 @@ func Default(n *Nomad) error {
 	}
 	// client.Allocations().Info(allocID string, q *api.QueryOptions)
 
+	n.nomad = client
 	n.Client = client
 	n.EventsClient = client.EventStream()
 	n.JobClient = client.Jobs()

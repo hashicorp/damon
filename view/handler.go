@@ -18,6 +18,13 @@ func (v *View) handleNoResources(text string, args ...interface{}) {
 	v.Layout.Body.AddItem(info, 0, 1, false)
 }
 
+func (v *View) err(err error, msg string) {
+	if err != nil {
+		fmt.Sprintf("%s: %s", msg, err.Error())
+		v.handleError(msg)
+	}
+}
+
 func (v *View) handleError(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	v.components.Failure.Render(msg)

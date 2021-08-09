@@ -68,40 +68,6 @@ func (v *View) mainCommands(event *tcell.EventKey) *tcell.EventKey {
 	return event
 }
 
-func (v *View) inputJobs(event *tcell.EventKey) *tcell.EventKey {
-	if event == nil {
-		return event
-	}
-
-	switch event.Key() {
-	case tcell.KeyRune:
-		switch event.Rune() {
-		case 't':
-			if v.Layout.Footer.HasFocus() || v.components.Search.InputField.Primitive().HasFocus() {
-				return event
-			}
-
-			row, _ := v.components.JobTable.Table.GetSelection()
-			jobID := v.components.JobTable.Table.GetCellContent(row, 0)
-			v.TaskGroups(jobID)
-
-		case '/':
-			if !v.Layout.Footer.HasFocus() {
-				if !v.state.Toggle.Search {
-					v.state.Toggle.Search = true
-					v.Search()
-				} else {
-					v.Layout.Container.SetFocus(v.components.Search.InputField.Primitive())
-				}
-				return nil
-			}
-		}
-
-	}
-
-	return event
-}
-
 func (v *View) inputAllocs(event *tcell.EventKey) *tcell.EventKey {
 	switch event.Key() {
 	case tcell.KeyCtrlE:
@@ -119,8 +85,6 @@ func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 	switch event.Key() {
 	case tcell.KeyEsc, tcell.KeyCtrlO, tcell.KeyEnter:
 		if v.components.LogStream.TextView.Primitive().HasFocus() {
-			// close(v.state.Channels.CancelLogStream)
-			// v.Layout.Container.SetInputCapture(v.InputJobs)
 			v.GoBack()
 			return nil
 		}

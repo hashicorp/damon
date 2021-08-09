@@ -88,6 +88,11 @@ func (j *JobTable) Render() error {
 	return nil
 }
 
+func (j *JobTable) GetIDForSelection() string {
+	row, _ := j.Table.GetSelection()
+	return j.Table.GetCellContent(row, 0)
+}
+
 func (j *JobTable) validate() error {
 	if j.Props.SelectJob == nil || j.Props.HandleNoResources == nil {
 		return ErrComponentPropsNotSet

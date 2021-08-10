@@ -34,6 +34,7 @@ func TestJobTable_Happy(t *testing.T) {
 				Namespace:         "space",
 				Status:            "running",
 				StatusDescription: "fine",
+				StatusSummary:     models.Summary{Total: 2, Running: 2},
 				SubmitTime:        now,
 			},
 			{
@@ -43,6 +44,7 @@ func TestJobTable_Happy(t *testing.T) {
 				Namespace:         "space",
 				Status:            "pending",
 				StatusDescription: "fine",
+				StatusSummary:     models.Summary{Total: 2, Running: 2},
 				SubmitTime:        now,
 			},
 			{
@@ -52,6 +54,7 @@ func TestJobTable_Happy(t *testing.T) {
 				Namespace:         "space",
 				Status:            "dead",
 				StatusDescription: "fine",
+				StatusSummary:     models.Summary{Total: 1, Running: 1},
 				SubmitTime:        now,
 			},
 			{
@@ -60,6 +63,17 @@ func TestJobTable_Happy(t *testing.T) {
 				Type:              "batch",
 				Namespace:         "space",
 				Status:            "dead",
+				StatusSummary:     models.Summary{Total: 1, Running: 0},
+				StatusDescription: "fine",
+				SubmitTime:        now,
+			},
+			{
+				ID:                "yo",
+				Name:              "venus",
+				Type:              "service",
+				Namespace:         "space",
+				Status:            "running",
+				StatusSummary:     models.Summary{Total: 1, Running: 0},
 				StatusDescription: "fine",
 				SubmitTime:        now,
 			},
@@ -85,35 +99,40 @@ func TestJobTable_Happy(t *testing.T) {
 
 		// It renders the correct number of rows
 		renderRowCallCount := fakeTable.RenderRowCallCount()
-		r.Equal(renderRowCallCount, 4)
+		r.Equal(renderRowCallCount, 5)
 
 		row1, index1, c1 := fakeTable.RenderRowArgsForCall(0)
 		row2, index2, c2 := fakeTable.RenderRowArgsForCall(1)
 		row3, index3, c3 := fakeTable.RenderRowArgsForCall(2)
 		row4, index4, c4 := fakeTable.RenderRowArgsForCall(3)
+		row5, index5, c5 := fakeTable.RenderRowArgsForCall(4)
 
-		expectedRow1 := []string{"ichi", "saturn", "service", "space", "running", now.Format(time.RFC3339), "0s"}
-		expectedRow2 := []string{"ni", "jupiter", "service", "space", "pending", now.Format(time.RFC3339), "0s"}
-		expectedRow3 := []string{"san", "neptun", "service", "space", "dead", now.Format(time.RFC3339), "0s"}
-		expectedRow4 := []string{"chi", "mars", "batch", "space", "dead", now.Format(time.RFC3339), "0s"}
+		expectedRow1 := []string{"ichi", "saturn", "service", "space", "running", "2/2", now.Format(time.RFC3339), "0s"}
+		expectedRow2 := []string{"ni", "jupiter", "service", "space", "pending", "2/2", now.Format(time.RFC3339), "0s"}
+		expectedRow3 := []string{"san", "neptun", "service", "space", "dead", "1/1", now.Format(time.RFC3339), "0s"}
+		expectedRow4 := []string{"chi", "mars", "batch", "space", "dead", "0/1", now.Format(time.RFC3339), "0s"}
+		expectedRow5 := []string{"yo", "venus", "service", "space", "running", "0/1", now.Format(time.RFC3339), "0s"}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)
 		r.Equal(expectedRow2, row2)
 		r.Equal(expectedRow3, row3)
 		r.Equal(expectedRow4, row4)
+		r.Equal(expectedRow5, row5)
 
 		// It renders the data at the correct index
 		r.Equal(index1, 1)
 		r.Equal(index2, 2)
 		r.Equal(index3, 3)
 		r.Equal(index4, 4)
+		r.Equal(index5, 5)
 
 		// It renders the rows in the correct color
 		r.Equal(c1, tcell.ColorWhite)
 		r.Equal(c2, tcell.ColorYellow)
 		r.Equal(c3, tcell.ColorRed)
 		r.Equal(c4, tcell.ColorDarkGrey)
+		r.Equal(c5, styles.TcellColorAttention)
 	})
 
 	t.Run("When render called again", func(t *testing.T) {
@@ -132,6 +151,7 @@ func TestJobTable_Happy(t *testing.T) {
 				Namespace:         "space",
 				Status:            "running",
 				StatusDescription: "fine",
+				StatusSummary:     models.Summary{Total: 1, Running: 1},
 				SubmitTime:        now,
 			},
 		}
@@ -247,34 +267,3 @@ func TestJobTable_Sad(t *testing.T) {
 		r.True(errors.Is(err, component.ErrComponentNotBound))
 	})
 }
-
-// 		expectedTableHeader := []string{
-// 			"ID",
-// 			"Name",
-// 			"Type",
-// 			"Namespace",
-// 			"Status",
-// 			"SubmitTime",
-// 			"Uptime",
-// 		}
-
-// 		expectedRows := [][]string{
-// 			{
-// 				"Strawberry",
-// 				"Strawberry",
-// 				"service",
-// 				"default",
-// 				"running",
-// 				now.Format(time.RFC3339),
-// 				"0s",
-// 			},
-// 			{
-// 				"Milchshake",
-// 				"Milchshake",
-// 				"service",
-// 				"default",
-// 				"dead",
-// 				now.Format(time.RFC3339),
-// 				"0s",
-// 			},
-// 		}

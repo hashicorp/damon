@@ -34,6 +34,17 @@ func (n *Nomad) Jobs(so *SearchOptions) ([]*models.Job, error) {
 func toJob(j *api.JobListStub) *models.Job {
 	t := time.Unix(0, j.SubmitTime)
 
+	total := len(j.JobSummary.Summary)
+	summary := models.Summary{
+		Total: total,
+	}
+
+	for _, job := range j.JobSummary.Summary {
+		if job.Running > 0 {
+			summary.Running++
+		}
+	}
+
 	return &models.Job{
 		ID:                j.ID,
 		Name:              j.Name,
@@ -41,6 +52,7 @@ func toJob(j *api.JobListStub) *models.Job {
 		Type:              j.Type,
 		Status:            j.Status,
 		StatusDescription: j.StatusDescription,
+		StatusSummary:     summary,
 		SubmitTime:        t,
 	}
 }

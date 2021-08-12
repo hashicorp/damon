@@ -32,6 +32,10 @@ func TestJobs(t *testing.T) {
 				SubmitTime:        now,
 				JobSummary: &api.JobSummary{
 					Namespace: "default",
+					Summary: map[string]api.TaskGroupSummary{
+						"task1": {Running: 0},
+						"task2": {Running: 1},
+					},
 				},
 			},
 			{
@@ -56,6 +60,7 @@ func TestJobs(t *testing.T) {
 			Type:              "service",
 			Status:            "running",
 			StatusDescription: "this is awesome",
+			StatusSummary:     models.Summary{Total: 2, Running: 1},
 			SubmitTime:        nowUnix,
 		}
 

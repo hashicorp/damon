@@ -23,6 +23,7 @@ var (
 		LabelType,
 		LabelNamespace,
 		LabelStatus,
+		LabelStatusSummary,
 		LabelSubmitTime,
 		LabelUptime,
 	}
@@ -123,22 +124,28 @@ func (j *JobTable) renderRows() {
 			job.Type,
 			job.Namespace,
 			job.Status,
+			fmt.Sprintf("%d/%d", job.StatusSummary.Running, job.StatusSummary.Total),
 			job.SubmitTime.Format(time.RFC3339),
 			formatTimeSince(time.Since(job.SubmitTime)),
 		}
 
 		index := i + 1
 
-		c := j.cellColor(job.Status, job.Type)
+		c := j.cellColor(job.Status, job.Type, job.StatusSummary)
 
 		j.Table.RenderRow(row, index, c)
 	}
 }
 
-func (j *JobTable) cellColor(status, typ string) tcell.Color {
+func (j *JobTable) cellColor(status, typ string, summary models.Summary) tcell.Color {
 	c := tcell.ColorWhite
 
 	switch status {
+	case models.StatusRunning:
+		if summary.Total != summary.Running &&
+			typ == models.TypeService {
+			c = styles.TcellColorAttention
+		}
 	case models.StatusPending:
 		c = tcell.ColorYellow
 	case models.StatusDead, models.StatusFailed:

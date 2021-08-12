@@ -27,7 +27,13 @@ type Job struct {
 	Type              string
 	Status            string
 	StatusDescription string
+	StatusSummary     Summary
 	SubmitTime        time.Time
+}
+
+type Summary struct {
+	Total   int
+	Running int
 }
 
 type TaskGroup struct {

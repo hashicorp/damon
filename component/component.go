@@ -15,6 +15,7 @@ const (
 	LabelNamespace         = "Namespace"
 	LabelStatus            = "Status"
 	LabelStatusDescription = "Description"
+	LabelStatusSummary     = "Summary"
 	LabelDescription       = "Description"
 	LabelCount             = "Count"
 	LabelSubmitTime        = "SubmitTime"

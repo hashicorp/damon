@@ -1,6 +1,7 @@
 package view
 
 import (
+	"fmt"
 	"regexp"
 
 	"github.com/hashicorp/nomad/api"
@@ -79,7 +80,7 @@ func (v *View) filterAllocs(jobID string) []*models.Alloc {
 }
 
 func (v *View) filterAllocsForJob(jobID string) []*models.Alloc {
-	rx, _ := regexp.Compile(jobID)
+	rx, _ := regexp.Compile(fmt.Sprintf("^%s$", jobID))
 	result := []*models.Alloc{}
 	for _, job := range v.state.Allocations {
 		switch true {

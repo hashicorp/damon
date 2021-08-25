@@ -13,7 +13,7 @@ import (
 func (v *View) Init(version string) {
 	// ClusterInfo
 	v.components.ClusterInfo.Props.Info = fmt.Sprintf(
-		"%sAdress%s: %s\n%sVersion:%s %s",
+		"%sAddress%s: %s\n%sVersion:%s %s",
 		styles.HighlightSecondaryTag,
 		styles.StandardColorTag,
 		v.state.NomadAddress,

@@ -51,12 +51,18 @@ type Alloc struct {
 	ID            string
 	Name          string
 	TaskGroup     string
+	Tasks         []AllocTask
 	TaskNames     []string
 	JobID         string
 	JobType       string
 	NodeID        string
 	NodeName      string
 	DesiredStatus string
+}
+
+type AllocTask struct {
+	Name   string
+	Events []*api.TaskEvent
 }
 
 type Task struct {

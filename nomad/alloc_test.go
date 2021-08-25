@@ -3,6 +3,7 @@ package nomad_test
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/nomad/api"
 	"github.com/stretchr/testify/require"
@@ -18,6 +19,8 @@ func TestJobAllocs(t *testing.T) {
 	fakeClient := &nomadfakes.FakeJobClient{}
 	client := &nomad.Nomad{JobClient: fakeClient}
 
+	now := time.Now()
+
 	t.Run("When there are no issues", func(t *testing.T) {
 		fakeClient.AllocationsReturns([]*api.AllocationListStub{
 			{
@@ -29,7 +32,15 @@ func TestJobAllocs(t *testing.T) {
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
 				TaskStates: map[string]*api.TaskState{
-					"task-1": {},
+					"task-1": {
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
 				},
 			},
 			{
@@ -41,7 +52,15 @@ func TestJobAllocs(t *testing.T) {
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
 				TaskStates: map[string]*api.TaskState{
-					"task-2": {},
+					"task-2": {
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
 				},
 			},
 		}, &api.QueryMeta{}, nil)
@@ -63,6 +82,18 @@ func TestJobAllocs(t *testing.T) {
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
 				TaskNames:     []string{"task-1"},
+				Tasks: []models.AllocTask{
+					{
+						Name: "task-1",
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
 			},
 			{
 				ID:            "id-two",
@@ -73,6 +104,18 @@ func TestJobAllocs(t *testing.T) {
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
 				TaskNames:     []string{"task-2"},
+				Tasks: []models.AllocTask{
+					{
+						Name: "task-2",
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
 			},
 		}
 

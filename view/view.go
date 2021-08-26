@@ -57,6 +57,7 @@ type Components struct {
 	NamespaceTable  *component.NamespaceTable
 	AllocationTable *component.AllocationTable
 	TaskGroupTable  *component.TaskGroupTable
+	TaskEventsTable *component.TaskEventsTable
 	JumpToJob       *component.JumpToJob
 	Error           *component.Error
 	Info            *component.Info

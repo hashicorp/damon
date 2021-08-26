@@ -5,28 +5,28 @@ import (
 )
 
 func (v *View) InputJobs(event *tcell.EventKey) *tcell.EventKey {
-	event = v.mainCommands(event)
+	event = v.InputMainCommands(event)
 	return v.inputJobs(event)
 }
 
 func (v *View) InputDeployments(event *tcell.EventKey) *tcell.EventKey {
-	return v.mainCommands(event)
+	return v.InputMainCommands(event)
 }
 
 func (v *View) InputNamespaces(event *tcell.EventKey) *tcell.EventKey {
-	return v.mainCommands(event)
+	return v.InputMainCommands(event)
 }
 
 func (v *View) InputTaskGroups(event *tcell.EventKey) *tcell.EventKey {
-	return v.mainCommands(event)
+	return v.InputMainCommands(event)
 }
 
 func (v *View) InputAllocations(event *tcell.EventKey) *tcell.EventKey {
-	v.mainCommands(event)
+	v.InputMainCommands(event)
 	return v.inputAllocs(event)
 }
 
-func (v *View) mainCommands(event *tcell.EventKey) *tcell.EventKey {
+func (v *View) InputMainCommands(event *tcell.EventKey) *tcell.EventKey {
 	if event == nil {
 		return event
 	}
@@ -77,6 +77,12 @@ func (v *View) inputAllocs(event *tcell.EventKey) *tcell.EventKey {
 		v.Logs(allocID, "stderr")
 
 		return nil
+	case tcell.KeyRune:
+		switch event.Rune() {
+		case 'e':
+			allocID := v.components.AllocationTable.GetIDForSelection()
+			v.TaskEvents(allocID)
+		}
 	}
 	return event
 }

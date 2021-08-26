@@ -133,3 +133,8 @@ func (t *AllocationTable) allocationSelected(row, column int) {
 	allocID := t.Table.GetCellContent(row, 0)
 	t.Props.SelectAllocation(allocID)
 }
+
+func (t *AllocationTable) GetIDForSelection() string {
+	row, _ := t.Table.GetSelection()
+	return t.Table.GetCellContent(row, 0)
+}

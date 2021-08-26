@@ -56,8 +56,12 @@ func toAllocs(list []*api.AllocationListStub) []*models.Alloc {
 			DesiredStatus: el.DesiredStatus,
 		}
 
-		for k := range el.TaskStates {
+		for k, t := range el.TaskStates {
 			alloc.TaskNames = append(alloc.TaskNames, k)
+			alloc.Tasks = append(alloc.Tasks, models.AllocTask{
+				Name:   k,
+				Events: t.Events,
+			})
 		}
 
 		result = append(result, alloc)

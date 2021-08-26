@@ -22,6 +22,8 @@ const (
 	LabelUptime            = "Uptime"
 	LabelDesiredStatus     = "DesiredStatus"
 	LabelTaskGroup         = "TaskGroup"
+	LabelTime              = "Time"
+	LabelMessage           = "Message"
 
 	LabelRunning  = "Running"
 	LabelStarting = "Starting"

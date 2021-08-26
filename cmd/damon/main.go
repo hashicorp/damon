@@ -57,6 +57,7 @@ func main() {
 	namespaces := component.NewNamespaceTable()
 	allocations := component.NewAllocationTable()
 	taskGroups := component.NewTaskGroupTable()
+	taskEvents := component.NewTaskEventsTable()
 	logs := component.NewLogger()
 	jumpToJob := component.NewJumpToJob()
 	logSearch := component.NewSearchField()
@@ -80,6 +81,7 @@ func main() {
 		NamespaceTable:  namespaces,
 		AllocationTable: allocations,
 		TaskGroupTable:  taskGroups,
+		TaskEventsTable: taskEvents,
 		LogStream:       logs,
 		JumpToJob:       jumpToJob,
 		Error:           errorComp,

@@ -100,6 +100,9 @@ func (v *View) Init(version string) {
 		v.handleInfo("You selected TaskGroup: %s\n Sorry, selecting task groups isn't implemented yet!", taskGroupID)
 	}
 
+	// TaskEventsTable
+	v.components.TaskEventsTable.Bind(v.Layout.Body)
+
 	// Logs
 	v.components.LogStream.Bind(v.Layout.Body)
 	v.components.LogStream.Props.HandleNoResources = v.handleNoResources

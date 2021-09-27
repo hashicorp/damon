@@ -53,6 +53,7 @@ type Components struct {
 	Commands        *component.Commands
 	Logo            *component.Logo
 	JobTable        *component.JobTable
+	JobStatus		*component.JobStatus
 	DeploymentTable *component.DeploymentTable
 	NamespaceTable  *component.NamespaceTable
 	AllocationTable *component.AllocationTable

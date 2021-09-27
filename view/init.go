@@ -72,6 +72,9 @@ func (v *View) Init(version string) {
 
 	v.components.JobTable.Props.HandleNoResources = v.handleNoResources
 
+	// JobStatus
+	v.components.JobStatus.Bind(v.Layout.Body)
+
 	// DeploymentTable
 	v.components.DeploymentTable.Bind(v.Layout.Body)
 	v.components.DeploymentTable.Props.SelectDeployment = func(jobID string) {

@@ -18,7 +18,7 @@ before submitting one. Thank you!
 
 ### Brew
 
---> Comming soon
+--> Coming soon
 
 ### Building from source and Run Damon
 

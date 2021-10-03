@@ -31,6 +31,10 @@ func TestJobAllocs(t *testing.T) {
 				NodeID:        "node-id",
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
+				JobVersion:    100,
+				ClientStatus:  "ClientStatus",
+				CreateTime:    100,
+				ModifyTime:    100,
 				TaskStates: map[string]*api.TaskState{
 					"task-1": {
 						Events: []*api.TaskEvent{
@@ -51,6 +55,10 @@ func TestJobAllocs(t *testing.T) {
 				NodeID:        "node-id",
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
+				JobVersion:    200,
+				ClientStatus:  "ClientStatus",
+				CreateTime:    200,
+				ModifyTime:    200,
 				TaskStates: map[string]*api.TaskState{
 					"task-2": {
 						Events: []*api.TaskEvent{
@@ -81,6 +89,10 @@ func TestJobAllocs(t *testing.T) {
 				NodeID:        "node-id",
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
+				Version:       100,
+				Status:        "ClientStatus",
+				Created:       time.Unix(0, 100),
+				Modified:      time.Unix(0, 100),
 				TaskNames:     []string{"task-1"},
 				Tasks: []models.AllocTask{
 					{
@@ -103,6 +115,10 @@ func TestJobAllocs(t *testing.T) {
 				NodeID:        "node-id",
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
+				Version:       200,
+				Status:        "ClientStatus",
+				Created:       time.Unix(0, 200),
+				Modified:      time.Unix(0, 200),
 				TaskNames:     []string{"task-2"},
 				Tasks: []models.AllocTask{
 					{
@@ -162,6 +178,10 @@ func TestAllocations(t *testing.T) {
 				NodeID:        "node-id",
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
+				JobVersion:    100,
+				ClientStatus:  "ClientStatus",
+				CreateTime:    100,
+				ModifyTime:    100,
 			},
 			{
 				ID:            "id-two",
@@ -171,6 +191,10 @@ func TestAllocations(t *testing.T) {
 				NodeID:        "node-id",
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
+				JobVersion:    200,
+				ClientStatus:  "ClientStatus",
+				CreateTime:    200,
+				ModifyTime:    200,
 			},
 		}, &api.QueryMeta{}, nil)
 
@@ -190,6 +214,10 @@ func TestAllocations(t *testing.T) {
 				NodeID:        "node-id",
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
+				Version:       100,
+				Status:        "ClientStatus",
+				Created:       time.Unix(0, 100),
+				Modified:      time.Unix(0, 100),
 			},
 			{
 				ID:            "id-two",
@@ -199,6 +227,10 @@ func TestAllocations(t *testing.T) {
 				NodeID:        "node-id",
 				NodeName:      "nodejs",
 				DesiredStatus: "skate",
+				Version:       200,
+				Status:        "ClientStatus",
+				Created:       time.Unix(0, 200),
+				Modified:      time.Unix(0, 200),
 			},
 		}
 

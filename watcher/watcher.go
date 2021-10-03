@@ -20,6 +20,7 @@ type Activities interface {
 type Nomad interface {
 	Address() string
 	Jobs(*nomad.SearchOptions) ([]*models.Job, error)
+	JobStatus(string, *nomad.SearchOptions) (*models.JobStatus, error)
 	Namespaces(*nomad.SearchOptions) ([]*models.Namespace, error)
 	Deployments(*nomad.SearchOptions) ([]*models.Deployment, error)
 	TaskGroups(string, *nomad.SearchOptions) ([]*models.TaskGroup, error)

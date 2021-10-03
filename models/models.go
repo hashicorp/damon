@@ -17,6 +17,7 @@ const (
 
 	TopicNamespace api.Topic = api.Topic("Namespace")
 	TopicTaskGroup api.Topic = api.Topic("TaskGroup")
+	TopicJobStatus api.Topic = api.Topic("JobStatus")
 	TopicLog       api.Topic = api.Topic("Log")
 )
 
@@ -29,6 +30,23 @@ type Job struct {
 	StatusDescription string
 	StatusSummary     Summary
 	SubmitTime        time.Time
+}
+
+type JobStatus struct {
+	ID                string
+	Name              string
+	Namespace         string
+	Type              string
+	Status            string
+	StatusDescription string
+	SubmitDate        time.Time
+	Priority          int
+	Datacenters       string
+	Periodic          bool
+	Parameterized     bool
+	TaskGroups        []*TaskGroup
+	TaskGroupStatus   []*TaskGroupStatus
+	Allocations       []*Alloc
 }
 
 type Summary struct {
@@ -47,6 +65,17 @@ type TaskGroup struct {
 	Lost     int
 }
 
+type TaskGroupStatus struct {
+	ID                string
+	Desired           int
+	Placed            int
+	Healthy           int
+	Unhealthy         int
+	ProgressDeadline  time.Duration
+	Status            string
+	StatusDescription string
+}
+
 type Alloc struct {
 	ID            string
 	Name          string
@@ -58,6 +87,10 @@ type Alloc struct {
 	NodeID        string
 	NodeName      string
 	DesiredStatus string
+	Version       uint64
+	Status        string
+	Created       time.Time
+	Modified      time.Time
 }
 
 type AllocTask struct {

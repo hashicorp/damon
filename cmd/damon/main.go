@@ -78,7 +78,7 @@ func main() {
 		Commands:        commands,
 		Logo:            logo,
 		JobTable:        jobs,
-		JobStatus: 		 jobStatus,
+		JobStatus:       jobStatus,
 		DeploymentTable: depl,
 		NamespaceTable:  namespaces,
 		AllocationTable: allocations,

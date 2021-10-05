@@ -123,8 +123,6 @@ func TestJobStatus(t *testing.T) {
 			},
 		}
 
-		expectedQueryOptions := &api.QueryOptions{Namespace: "default"}
-
 		//check that no error occured
 		r.NoError(err)
 
@@ -134,7 +132,7 @@ func TestJobStatus(t *testing.T) {
 		r.Equal(fakeJobClient.InfoCallCount(), 1)
 
 		//check that the query params where passed correctly
-		r.Equal(queryOptions, expectedQueryOptions)
+		r.Nil(queryOptions)
 
 		//check all fields are set
 		r.Equal(expectedJobStatus, jobStatus)

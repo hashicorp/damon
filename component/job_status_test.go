@@ -86,7 +86,7 @@ func TestJobStatus_Happy(t *testing.T) {
 		r.Equal(strings.ReplaceAll(text, " ", ""), `
 ID=fakeID
 Name=fakeName
-SubmitDate=1987-10-1612:45:00
+SubmitTime=1987-10-1612:45:00
 Type=fakeType
 Priority=0
 Datacenters=fakeDC

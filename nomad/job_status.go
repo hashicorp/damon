@@ -17,10 +17,7 @@ func (n *Nomad) JobStatus(jobID string, so *SearchOptions) (*models.JobStatus, e
 
 	taskgroups, _ := n.TaskGroups(jobID, so)
 
-	info, _, err := n.JobClient.Info(jobID, &api.QueryOptions{
-		Namespace: so.Namespace,
-		Region:    so.Region,
-	})
+	info, err := n.GetJob(jobID)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve job info: %w", err)

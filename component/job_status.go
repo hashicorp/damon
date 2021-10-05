@@ -11,6 +11,10 @@ import (
 	"github.com/rivo/tview"
 )
 
+const (
+	TitleJobStatus = "Status"
+)
+
 type JobStatus struct {
 	TextView TextView
 	Props    *JobStatusProps
@@ -23,7 +27,6 @@ type JobStatusProps struct {
 
 func NewJobStatus() *JobStatus {
 	textView := primitive.NewTextView(tview.AlignLeft)
-	textView.ModifyPrimitive(applyModifiers)
 	return &JobStatus{
 		TextView: textView,
 		Props:    &JobStatusProps{},
@@ -47,17 +50,21 @@ func (jobStatus *JobStatus) Render() error {
 		return nil
 	}
 
+	jobStatus.TextView.ModifyPrimitive(func(textView *tview.TextView) {
+		applyModifiers(textView, jobStatus.Props.Data.ID)
+	})
+
 	var jobStatusText []string
 	jobStatusText = append(jobStatusText,
 		"\n",
 		jobStatus.renderInfoData(),
-		"\n  Summary\n",
+		fmt.Sprintf("\n  %s\n", LabelStatusSummary),
 		jobStatus.renderSummary(),
-		"\n  Latest Deployment\n",
+		fmt.Sprintf("\n  %s\n", LabelLatestDeployment),
 		jobStatus.renderLatestDeployment(),
-		"\n  Deployed\n",
+		fmt.Sprintf("\n  %s\n", LabelDeployed),
 		jobStatus.renderDeployments(),
-		"\n  Allocations\n",
+		fmt.Sprintf("\n  %s\n", LabelAllocations),
 		jobStatus.renderAllocs())
 
 	jobStatus.TextView.SetText(strings.Join(jobStatusText, ""))
@@ -77,16 +84,16 @@ func (jobStatus *JobStatus) renderInfoData() string {
 	}
 
 	infoData := [][]string{
-		{"ID", frmt(j.ID)},
-		{"Name", frmt(j.Name)},
-		{"Submit Date", frmt(j.SubmitDate.Format("2006-01-02 15:04:05"))},
-		{"Type", frmt(j.Type)},
-		{"Priority", frmt(fmt.Sprint(j.Priority))},
-		{"Datacenters", frmt(j.Datacenters)},
-		{"Namespace", frmt(j.Namespace)},
-		{"Status", frmt(j.Status)},
-		{"Periodic", frmt(fmt.Sprint(j.Periodic))},
-		{"Parameterized", frmt(fmt.Sprint(j.Parameterized))},
+		{LabelID, frmt(j.ID)},
+		{LabelName, frmt(j.Name)},
+		{LabelSubmitTime, frmt(j.SubmitDate.Format("2006-01-02 15:04:05"))},
+		{LabelType, frmt(j.Type)},
+		{LabelPriority, frmt(fmt.Sprint(j.Priority))},
+		{LabelDatacenters, frmt(j.Datacenters)},
+		{LabelNamespace, frmt(j.Namespace)},
+		{LabelStatus, frmt(j.Status)},
+		{LabelPeriodic, frmt(fmt.Sprint(j.Periodic))},
+		{LabelParameterized, frmt(fmt.Sprint(j.Parameterized))},
 	}
 	tableWriter.AppendBulk(infoData)
 	tableWriter.Render()
@@ -99,7 +106,7 @@ func (jobStatus *JobStatus) renderSummary() string {
 	tableString := &strings.Builder{}
 	tableWriter := tablewriter.NewWriter(tableString)
 	format(tableWriter)
-	tableWriter.SetHeader([]string{"Task Group", "Queued", "Starting", "Running", "Failed", "Complete", "Lost"})
+	tableWriter.SetHeader([]string{LabelTaskGroup, LabelQueued, LabelStarting, LabelRunning, LabelFailed, LabelComplete, LabelLost})
 
 	for _, tg := range tasks {
 		row := []string{
@@ -134,9 +141,9 @@ func (jobStatus *JobStatus) renderLatestDeployment() string {
 	}
 
 	infoData := [][]string{
-		{"ID", frmt(ts.ID)},
-		{"Status", frmt(ts.Status)},
-		{"Status Description", frmt(ts.StatusDescription)},
+		{LabelID, frmt(ts.ID)},
+		{LabelStatus, frmt(ts.Status)},
+		{LabelStatusDescriptionLong, frmt(ts.StatusDescription)},
 	}
 	tableWriter.AppendBulk(infoData)
 	tableWriter.Render()
@@ -150,7 +157,7 @@ func (jobStatus *JobStatus) renderDeployments() string {
 	tableWriter := tablewriter.NewWriter(tableString)
 	format(tableWriter)
 
-	tableWriter.SetHeader([]string{"Task Group", "Desired", "Placed", "Healthy", "Unhealthy", "Progress Deadline"})
+	tableWriter.SetHeader([]string{LabelTaskGroup, LabelDesired, LabelPlaced, LabelHealthy, LabelUnhealthy, LabelProgressDeadline})
 
 	for _, t := range tgs {
 		row := []string{
@@ -174,7 +181,7 @@ func (jobStatus *JobStatus) renderAllocs() string {
 	tableWriter := tablewriter.NewWriter(tableString)
 	format(tableWriter)
 
-	tableWriter.SetHeader([]string{"ID", "Node ID", "Task Group", "Version", "Desired", "Status", "Created", "Modified"})
+	tableWriter.SetHeader([]string{LabelID, LabelNodeID, LabelTaskGroup, LabelVersion, LabelDesired, LabelStatus, LabelCreated, LabelModified})
 
 	for _, t := range tgs {
 		row := []string{
@@ -206,8 +213,8 @@ func format(tw *tablewriter.Table) {
 	tw.SetTablePadding("\t")
 }
 
-func applyModifiers(t *tview.TextView) {
+func applyModifiers(t *tview.TextView, jobID string) {
 	t.SetScrollable(true)
 	t.SetBorder(true)
-	t.SetTitle("Job Status")
+	t.SetTitle(fmt.Sprintf("%s (Job: %s)", TitleJobStatus, jobID))
 }

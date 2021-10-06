@@ -28,6 +28,7 @@ type Watcher interface {
 	SubscribeHandler(handler models.Handler, handle func(string, ...interface{}))
 	SubscribeToNamespaces(notify func())
 	SubscribeToTaskGroups(jobID string, notify func()) error
+	SubscribeToJobStatus(jobID string, notify func()) error
 	SubscribeToLogs(allocID, source string, notify func())
 
 	ForceUpdate()
@@ -53,6 +54,7 @@ type Components struct {
 	Commands        *component.Commands
 	Logo            *component.Logo
 	JobTable        *component.JobTable
+	JobStatus       *component.JobStatus
 	DeploymentTable *component.DeploymentTable
 	NamespaceTable  *component.NamespaceTable
 	AllocationTable *component.AllocationTable

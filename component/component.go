@@ -32,6 +32,25 @@ const (
 	LabelLost     = "Lost"
 	LabelFailed   = "Failed"
 
+	LabelDesired               = "Desired"
+	LabelHealthy               = "Healthy"
+	LabelUnhealthy             = "Unhealthy"
+	LabelPlaced                = "Placed"
+	LabelProgressDeadline      = "Progress Deadline"
+	LabelVersion               = "Version"
+	LabelStatusDescriptionLong = "Status Description"
+	LabelPriority              = "Priority"
+	LabelDatacenters           = "Datacenters"
+	LabelPeriodic              = "Periodic"
+	LabelParameterized         = "Parameterized"
+
+	LabelLatestDeployment = "Latest Deployment"
+	LabelDeployed         = "Deployed"
+	LabelAllocations      = "Allocations"
+
+	LabelCreated  = "Created"
+	LabelModified = "Modified"
+
 	LabelNodeID   = "NodeID"
 	LabelNodeName = "NodeName"
 

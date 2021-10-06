@@ -53,6 +53,7 @@ func main() {
 	commands := component.NewCommands()
 	logo := component.NewLogo()
 	jobs := component.NewJobsTable()
+	jobStatus := component.NewJobStatus()
 	depl := component.NewDeploymentTable()
 	namespaces := component.NewNamespaceTable()
 	allocations := component.NewAllocationTable()
@@ -77,6 +78,7 @@ func main() {
 		Commands:        commands,
 		Logo:            logo,
 		JobTable:        jobs,
+		JobStatus:       jobStatus,
 		DeploymentTable: depl,
 		NamespaceTable:  namespaces,
 		AllocationTable: allocations,

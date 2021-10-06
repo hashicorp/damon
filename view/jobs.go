@@ -116,6 +116,14 @@ func (v *View) inputJobs(event *tcell.EventKey) *tcell.EventKey {
 			jobID := v.components.JobTable.GetIDForSelection()
 			v.TaskGroups(jobID)
 
+		case 'i':
+			if v.Layout.Footer.HasFocus() || v.components.Search.InputField.Primitive().HasFocus() {
+				return event
+			}
+
+			jobID := v.components.JobTable.GetIDForSelection()
+			v.JobStatus(jobID)
+
 		case '/':
 			if !v.Layout.Footer.HasFocus() {
 				if !v.state.Toggle.Search {

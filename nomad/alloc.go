@@ -1,6 +1,8 @@
 package nomad
 
 import (
+	"time"
+
 	"github.com/hashicorp/nomad/api"
 
 	"github.com/hcjulz/damon/models"
@@ -54,6 +56,10 @@ func toAllocs(list []*api.AllocationListStub) []*models.Alloc {
 			NodeID:        el.NodeID,
 			NodeName:      el.NodeName,
 			DesiredStatus: el.DesiredStatus,
+			Version:       el.JobVersion,
+			Status:        el.ClientStatus,
+			Created:       time.Unix(0, el.CreateTime),
+			Modified:      time.Unix(0, el.ModifyTime),
 		}
 
 		for k, t := range el.TaskStates {

@@ -17,6 +17,7 @@ type State struct {
 	Allocations []*models.Alloc
 	Namespaces  []*models.Namespace
 	Logs        []byte
+	JobStatus   *models.JobStatus
 
 	SelectedNamespace string
 	SelectedRegion    string

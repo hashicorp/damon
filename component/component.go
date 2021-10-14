@@ -24,6 +24,7 @@ const (
 	LabelTaskGroup         = "TaskGroup"
 	LabelTime              = "Time"
 	LabelMessage           = "Message"
+	LabelReady             = "Ready"
 
 	LabelRunning  = "Running"
 	LabelStarting = "Starting"

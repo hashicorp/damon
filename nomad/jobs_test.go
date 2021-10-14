@@ -17,7 +17,8 @@ func TestJobs(t *testing.T) {
 	r := require.New(t)
 
 	fakeJobClient := &nomadfakes.FakeJobClient{}
-	client := &nomad.Nomad{JobClient: fakeJobClient}
+	fakeDpClient := &nomadfakes.FakeDeploymentClient{}
+	client := &nomad.Nomad{JobClient: fakeJobClient, DpClient: fakeDpClient}
 
 	t.Run("When there are no issues", func(t *testing.T) {
 		now := time.Now().UnixNano()
@@ -47,6 +48,23 @@ func TestJobs(t *testing.T) {
 			},
 		}, nil, nil)
 
+		fakeDpClient.ListReturns([]*api.Deployment{
+			{
+				ID:                "42",
+				JobID:             "fake-id-1",
+				Namespace:         "transformers",
+				Status:            "successful",
+				StatusDescription: "car",
+			},
+			{
+				ID:                "23",
+				JobID:             "fake-id-1",
+				Namespace:         "transformers",
+				Status:            "successful",
+				StatusDescription: "truck",
+			},
+		}, &api.QueryMeta{}, nil)
+
 		so := nomad.SearchOptions{Namespace: "default"}
 
 		jobs, err := client.Jobs(&so)
@@ -62,6 +80,7 @@ func TestJobs(t *testing.T) {
 			StatusDescription: "this is awesome",
 			StatusSummary:     models.Summary{Total: 2, Running: 1},
 			SubmitTime:        nowUnix,
+			DeploymentStatus:  "successful",
 		}
 
 		expectedQueryOptions := &api.QueryOptions{Namespace: "default"}

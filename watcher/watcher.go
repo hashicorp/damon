@@ -156,7 +156,10 @@ func (w *Watcher) update(topic api.Topic) {
 	case api.TopicJob:
 		w.updateJobs()
 	case api.TopicAllocation:
-		w.updateAllocations()
+		{
+			w.updateAllocations()
+			w.updateJobs() // * Need this update, since we show allocation count in job view.
+		}
 	case api.TopicDeployment:
 		w.updateDeployments()
 	}

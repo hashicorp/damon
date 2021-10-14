@@ -32,7 +32,7 @@ func (n *Nomad) JobStatus(jobID string, so *SearchOptions) (*models.JobStatus, e
 		return nil, fmt.Errorf("failed to retrieve job deployments: %w", err)
 	}
 
-	taskGroupStatus := toTaskGroupStatus(jobID, d)
+	taskGroupStatus, _ := toTaskGroupStatus(jobID, d)
 
 	allocations, _ := n.JobAllocs(jobID, so)
 
@@ -43,6 +43,17 @@ func (n *Nomad) JobStatus(jobID string, so *SearchOptions) (*models.JobStatus, e
 	jobStatus := toJobStatus(info, taskgroups, taskGroupStatus, allocations)
 
 	return jobStatus, nil
+}
+
+func (n *Nomad) TaskStatus(jobID string) ([]*models.TaskGroupStatus, string, error) {
+	d, _, err := n.DpClient.List(&api.QueryOptions{})
+
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to retrieve task status: %w", err)
+	}
+	taskGroupStatus, deploymentStatus := toTaskGroupStatus(jobID, d)
+
+	return taskGroupStatus, deploymentStatus, nil
 }
 
 func toJobStatus(job *api.Job, tasks []*models.TaskGroup, taskStatus []*models.TaskGroupStatus, allocs []*models.Alloc) *models.JobStatus {
@@ -65,10 +76,12 @@ func toJobStatus(job *api.Job, tasks []*models.TaskGroup, taskStatus []*models.T
 	return jobStatus
 }
 
-func toTaskGroupStatus(jobID string, dep []*api.Deployment) []*models.TaskGroupStatus {
+func toTaskGroupStatus(jobID string, dep []*api.Deployment) ([]*models.TaskGroupStatus, string) {
 	result := make([]*models.TaskGroupStatus, 0., len(dep))
+	deploymentStatus := ""
 	for _, d := range dep {
 		if d.JobID == jobID {
+			deploymentStatus = d.Status
 			for _, t := range d.TaskGroups {
 				result = append(result, &models.TaskGroupStatus{
 					ID:                d.JobID,
@@ -85,5 +98,5 @@ func toTaskGroupStatus(jobID string, dep []*api.Deployment) []*models.TaskGroupS
 		}
 
 	}
-	return result
+	return result, deploymentStatus
 }

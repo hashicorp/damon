@@ -24,7 +24,10 @@ func (n *Nomad) Jobs(so *SearchOptions) ([]*models.Job, error) {
 
 	var jobs []*models.Job
 	for _, j := range jobList {
+		readyStatus, deploymentStatus := n.jobSummary(j.ID)
 		job := toJob(j)
+		job.ReadyStatus = readyStatus
+		job.DeploymentStatus = deploymentStatus
 		jobs = append(jobs, job)
 	}
 
@@ -55,6 +58,23 @@ func toJob(j *api.JobListStub) *models.Job {
 		StatusSummary:     summary,
 		SubmitTime:        t,
 	}
+}
+
+func (n *Nomad) jobSummary(jobID string) (models.ReadyStatus, string) {
+	taskGroupStatus, deploymentStatus, _ := n.TaskStatus(jobID)
+	status := models.ReadyStatus{
+		Desired:   0,
+		Running:   0,
+		Healthy:   0,
+		Unhealthy: 0,
+	}
+	for _, taskGroup := range taskGroupStatus {
+		status.Desired += taskGroup.Desired
+		status.Running += taskGroup.Placed
+		status.Healthy += taskGroup.Healthy
+		status.Unhealthy += taskGroup.Unhealthy
+	}
+	return status, deploymentStatus
 }
 
 func (n *Nomad) GetJob(jobID string) (*api.Job, error) {

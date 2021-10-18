@@ -5,6 +5,7 @@ import (
 	"github.com/rivo/tview"
 
 	"github.com/hcjulz/damon/models"
+	"github.com/hcjulz/damon/primitives"
 )
 
 const (
@@ -111,4 +112,11 @@ type DropDown interface {
 	SetOptions(options []string, selected func(text string, index int))
 	SetCurrentOption(index int)
 	SetSelectedFunc(selected func(text string, index int))
+}
+
+//go:generate counterfeiter . Selector
+type Selector interface {
+	Primitive
+	GetTable() *primitives.Table
+	Container() tview.Primitive
 }

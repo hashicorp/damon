@@ -76,6 +76,7 @@ type Table interface {
 	RenderHeader(data []string)
 	RenderRow(data []string, index int, c tcell.Color)
 	SetSelectedFunc(fn func(row, column int))
+	SetInputCapture(capture func(event *tcell.EventKey) *tcell.EventKey)
 }
 
 //go:generate counterfeiter . TextView

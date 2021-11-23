@@ -52,7 +52,7 @@ func TestSubscribeToLogs_Happy(t *testing.T) {
 		callCount++
 	}
 
-	watcher.SubscribeToLogs("the-alloc", "stderr", notify)
+	watcher.SubscribeToLogs("the-alloc", "the-task", "stderr", notify)
 
 	actualAllocID, taskName, actualSource, _ := nomad.LogsArgsForCall(0)
 
@@ -103,7 +103,7 @@ func TestSubscribeToLogs_Sad(t *testing.T) {
 		})
 
 		var callCount int
-		watcher.SubscribeToLogs("alloc-id", "some-source", func() { callCount++ })
+		watcher.SubscribeToLogs("alloc-id", "task-id", "some-source", func() { callCount++ })
 
 		r.True(called)
 		r.Equal(callCount, 0)
@@ -125,7 +125,7 @@ func TestSubscribeToLogs_Sad(t *testing.T) {
 		})
 
 		var callCount int
-		watcher.SubscribeToLogs("alloc-id", "some-source", func() { callCount++ })
+		watcher.SubscribeToLogs("alloc-id", "task-id", "some-source", func() { callCount++ })
 
 		r.True(called)
 		r.Equal(callCount, 0)
@@ -154,7 +154,7 @@ func TestSubscribeToLogs_Sad(t *testing.T) {
 		})
 
 		var callCount int
-		watcher.SubscribeToLogs("alloc-id", "some-source", func() { callCount++ })
+		watcher.SubscribeToLogs("alloc-id", "task-id", "some-source", func() { callCount++ })
 
 		r.Equal(callCount, 1)
 

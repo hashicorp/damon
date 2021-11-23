@@ -92,8 +92,12 @@ func (v *View) Init(version string) {
 	v.components.AllocationTable.Props.SelectAllocation = func(allocID string) {
 		// Reset the LogSearch field in case there was a search string
 		// entered previously.
+		allocs, ok := v.getAllocation(allocID)
+		if !ok {
+			return
+		}
 		v.components.LogSearch.InputField.SetText("")
-		v.Logs(allocID, "stdout")
+		v.Logs(allocs.TaskNames, allocID, "stdout")
 	}
 
 	// TaskGroupTable
@@ -149,6 +153,11 @@ func (v *View) Init(version string) {
 	}
 
 	v.components.Confirm.Bind(v.Layout.Pages)
+	selectorModal := v.components.SelectorModal
+	selectorModal.Bind(v.Layout.Pages)
+	selectorModal.BindKey(tcell.KeyEsc, func() {
+		selectorModal.Close()
+	})
 
 	v.Watcher.SubscribeHandler(models.HandleError, v.handleError)
 	v.Watcher.SubscribeHandler(models.HandleFatal, v.handleFatal)

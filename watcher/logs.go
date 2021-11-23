@@ -5,7 +5,7 @@ import "github.com/hcjulz/damon/models"
 // SubscribeToLogs starts an event stream for Logs
 // which updates the state whenever a new log is written.
 // The stream will be stopped whenever a new subscription happens.
-func (w *Watcher) SubscribeToLogs(allocID, source string, notify func()) {
+func (w *Watcher) SubscribeToLogs(allocID, taskName, source string, notify func()) {
 	// wipe any previous logs
 	w.state.Logs = nil
 
@@ -24,7 +24,8 @@ func (w *Watcher) SubscribeToLogs(allocID, source string, notify func()) {
 	w.Notify(models.TopicLog)
 
 	cancel := make(chan struct{})
-	streamCh, errorCh := w.nomad.Logs(allocID, alloc.TaskNames[0], source, cancel)
+	// streamCh, errorCh := w.nomad.Logs(allocID, alloc.TaskNames[0], source, cancel)
+	streamCh, errorCh := w.nomad.Logs(allocID, taskName, source, cancel)
 
 	w.activities.Add(cancel)
 

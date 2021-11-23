@@ -80,7 +80,6 @@ func Default(n *Nomad) error {
 	if err != nil {
 		return err
 	}
-	// client.Allocations().Info(allocID string, q *api.QueryOptions)
 
 	n.nomad = client
 	n.Client = client

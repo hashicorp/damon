@@ -5,6 +5,7 @@ import (
 	"github.com/rivo/tview"
 
 	"github.com/hcjulz/damon/models"
+	"github.com/hcjulz/damon/primitives"
 )
 
 const (
@@ -75,6 +76,7 @@ type Table interface {
 	RenderHeader(data []string)
 	RenderRow(data []string, index int, c tcell.Color)
 	SetSelectedFunc(fn func(row, column int))
+	SetInputCapture(capture func(event *tcell.EventKey) *tcell.EventKey)
 }
 
 //go:generate counterfeiter . TextView
@@ -111,4 +113,11 @@ type DropDown interface {
 	SetOptions(options []string, selected func(text string, index int))
 	SetCurrentOption(index int)
 	SetSelectedFunc(selected func(text string, index int))
+}
+
+//go:generate counterfeiter . Selector
+type Selector interface {
+	Primitive
+	GetTable() *primitives.Table
+	Container() tview.Primitive
 }

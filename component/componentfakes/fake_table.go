@@ -60,6 +60,11 @@ type FakeTable struct {
 		arg2 int
 		arg3 tcell.Color
 	}
+	SetInputCaptureStub        func(func(event *tcell.EventKey) *tcell.EventKey)
+	setInputCaptureMutex       sync.RWMutex
+	setInputCaptureArgsForCall []struct {
+		arg1 func(event *tcell.EventKey) *tcell.EventKey
+	}
 	SetSelectedFuncStub        func(func(row int, column int))
 	setSelectedFuncMutex       sync.RWMutex
 	setSelectedFuncArgsForCall []struct {
@@ -346,6 +351,38 @@ func (fake *FakeTable) RenderRowArgsForCall(i int) ([]string, int, tcell.Color) 
 	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
+func (fake *FakeTable) SetInputCapture(arg1 func(event *tcell.EventKey) *tcell.EventKey) {
+	fake.setInputCaptureMutex.Lock()
+	fake.setInputCaptureArgsForCall = append(fake.setInputCaptureArgsForCall, struct {
+		arg1 func(event *tcell.EventKey) *tcell.EventKey
+	}{arg1})
+	stub := fake.SetInputCaptureStub
+	fake.recordInvocation("SetInputCapture", []interface{}{arg1})
+	fake.setInputCaptureMutex.Unlock()
+	if stub != nil {
+		fake.SetInputCaptureStub(arg1)
+	}
+}
+
+func (fake *FakeTable) SetInputCaptureCallCount() int {
+	fake.setInputCaptureMutex.RLock()
+	defer fake.setInputCaptureMutex.RUnlock()
+	return len(fake.setInputCaptureArgsForCall)
+}
+
+func (fake *FakeTable) SetInputCaptureCalls(stub func(func(event *tcell.EventKey) *tcell.EventKey)) {
+	fake.setInputCaptureMutex.Lock()
+	defer fake.setInputCaptureMutex.Unlock()
+	fake.SetInputCaptureStub = stub
+}
+
+func (fake *FakeTable) SetInputCaptureArgsForCall(i int) func(event *tcell.EventKey) *tcell.EventKey {
+	fake.setInputCaptureMutex.RLock()
+	defer fake.setInputCaptureMutex.RUnlock()
+	argsForCall := fake.setInputCaptureArgsForCall[i]
+	return argsForCall.arg1
+}
+
 func (fake *FakeTable) SetSelectedFunc(arg1 func(row int, column int)) {
 	fake.setSelectedFuncMutex.Lock()
 	fake.setSelectedFuncArgsForCall = append(fake.setSelectedFuncArgsForCall, struct {
@@ -426,6 +463,8 @@ func (fake *FakeTable) Invocations() map[string][][]interface{} {
 	defer fake.renderHeaderMutex.RUnlock()
 	fake.renderRowMutex.RLock()
 	defer fake.renderRowMutex.RUnlock()
+	fake.setInputCaptureMutex.RLock()
+	defer fake.setInputCaptureMutex.RUnlock()
 	fake.setSelectedFuncMutex.RLock()
 	defer fake.setSelectedFuncMutex.RUnlock()
 	fake.setTitleMutex.RLock()

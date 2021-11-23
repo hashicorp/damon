@@ -50,6 +50,7 @@ func main() {
 
 	clusterInfo := component.NewClusterInfo()
 	selections := component.NewSelections(state)
+	selectorModal := component.NewSelectorModal()
 	commands := component.NewCommands()
 	logo := component.NewLogo()
 	jobs := component.NewJobsTable()
@@ -75,6 +76,7 @@ func main() {
 	components := &view.Components{
 		ClusterInfo:     clusterInfo,
 		Selections:      selections,
+		SelectorModal:   selectorModal,
 		Commands:        commands,
 		Logo:            logo,
 		JobTable:        jobs,

@@ -23,7 +23,7 @@ type SelectorProps struct {
 
 func NewSelectorModal() *SelectorModal {
 	s := &SelectorModal{
-		Modal:       primitives.NewSelector(),
+		Modal:       primitives.NewSelectionModal(),
 		Props:       &SelectorProps{},
 		keyBindings: map[tcell.Key]func(){},
 	}

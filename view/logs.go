@@ -10,7 +10,24 @@ import (
 	"github.com/hcjulz/damon/styles"
 )
 
-func (v *View) Logs(allocID, source string) {
+func (v *View) Logs(tasks []string, allocID, source string) {
+	if len(tasks) > 1 {
+		v.components.SelectorModal.Props.Items = tasks
+		v.components.SelectorModal.Props.AllocationID = allocID
+		v.components.SelectorModal.SetSelectedFunc(func(task string) {
+			v.Logs([]string{task}, allocID, source)
+		})
+
+		v.components.SelectorModal.Render()
+
+		v.Draw()
+
+		v.Layout.Container.SetFocus(v.components.SelectorModal.Modal.Primitive())
+		return
+	}
+
+	taskName := tasks[0]
+
 	v.Layout.Body.Clear()
 
 	v.Layout.Container.SetInputCapture(v.InputLogs)
@@ -19,18 +36,18 @@ func (v *View) Logs(allocID, source string) {
 	update := func() {
 		v.components.LogStream.Props.Data = filterLogs(v.state.Logs, v.state.Filter.Logs)
 		v.components.LogStream.Render()
+
 		v.Draw()
+
+		v.Layout.Container.SetFocus(v.components.LogStream.TextView.Primitive())
 	}
 
-	v.Layout.Container.SetFocus(v.components.LogStream.TextView.Primitive())
+	v.Watcher.SubscribeToLogs(allocID, taskName, source, update)
 
 	update()
 
-	v.Watcher.SubscribeToLogs(allocID, source, update)
-
 	v.addToHistory(v.state.SelectedNamespace, models.TopicLog, func() {
 		update()
-		// v.Logs(allocID)
 	})
 
 	v.Layout.Container.SetInputCapture(v.InputLogs)

@@ -29,7 +29,7 @@ type Watcher interface {
 	SubscribeToNamespaces(notify func())
 	SubscribeToTaskGroups(jobID string, notify func()) error
 	SubscribeToJobStatus(jobID string, notify func()) error
-	SubscribeToLogs(allocID, source string, notify func())
+	SubscribeToLogs(allocID, taskName, source string, notify func())
 
 	ForceUpdate()
 }
@@ -51,6 +51,7 @@ type View struct {
 type Components struct {
 	ClusterInfo     *component.ClusterInfo
 	Selections      *component.Selections
+	SelectorModal   *component.SelectorModal
 	Commands        *component.Commands
 	Logo            *component.Logo
 	JobTable        *component.JobTable

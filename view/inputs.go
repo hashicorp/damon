@@ -73,8 +73,15 @@ func (v *View) inputAllocs(event *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyCtrlE:
 		r, c := v.components.AllocationTable.Table.GetSelection()
 		allocID := v.components.AllocationTable.Table.GetCellContent(r, c)
+
+		allocs, ok := v.getAllocation(allocID)
+		if !ok {
+			return nil
+		}
+
 		v.components.LogSearch.InputField.SetText("")
-		v.Logs(allocID, "stderr")
+
+		v.Logs(allocs.TaskNames, allocID, "stderr")
 
 		return nil
 	case tcell.KeyRune:

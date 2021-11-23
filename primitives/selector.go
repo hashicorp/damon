@@ -9,7 +9,7 @@ type SelectionModal struct {
 	container *tview.Flex
 }
 
-func NewSelector() *SelectionModal {
+func NewSelectionModal() *SelectionModal {
 	t := NewTable()
 	f := tview.NewFlex().
 		AddItem(nil, 0, 1, false).
@@ -31,4 +31,8 @@ func (s *SelectionModal) Container() tview.Primitive {
 
 func (s *SelectionModal) Primitive() tview.Primitive {
 	return s.Table.primitive
+}
+
+func (s *SelectionModal) GetTable() *Table {
+	return s.Table
 }

@@ -69,6 +69,10 @@ func (t *Table) SetSelectedFunc(fn func(row, column int)) {
 	t.primitive.SetSelectedFunc(fn)
 }
 
+func (t *Table) SetInputCapture(capture func(event *tcell.EventKey) *tcell.EventKey) {
+	t.primitive.SetInputCapture(capture)
+}
+
 func (t *Table) Primitive() tview.Primitive {
 	return t.primitive
 }

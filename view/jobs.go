@@ -47,6 +47,7 @@ func (v *View) Jobs() {
 	}
 
 	v.Watcher.Subscribe(api.TopicJob, update)
+	v.Watcher.Subscribe(api.TopicAllocation, update)
 	if len(v.state.Jobs) == 0 {
 		v.Watcher.ForceUpdate()
 	}

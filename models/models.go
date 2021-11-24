@@ -30,6 +30,8 @@ type Job struct {
 	StatusDescription string
 	StatusSummary     Summary
 	SubmitTime        time.Time
+	ReadyStatus       ReadyStatus
+	DeploymentStatus  string
 }
 
 type JobStatus struct {
@@ -47,6 +49,13 @@ type JobStatus struct {
 	TaskGroups        []*TaskGroup
 	TaskGroupStatus   []*TaskGroupStatus
 	Allocations       []*Alloc
+}
+
+type ReadyStatus struct {
+	Desired   int
+	Running   int
+	Healthy   int
+	Unhealthy int
 }
 
 type Summary struct {

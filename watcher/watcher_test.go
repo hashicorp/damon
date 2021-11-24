@@ -94,8 +94,8 @@ func TestWatch_Happy(t *testing.T) {
 		// watcher.SubscribeHandler(models.HandleError, handleErr)
 
 		// Setup expectations
-		expectedJobsInitialCall := []*models.Job{{ID: "jupiter"}}
-		expectedJobsUpdated := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
+		expectedJobsInitialCall := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
+		expectedJobsUpdated := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}, {ID: "mars"}}
 
 		// callCount indicates how often the subscriber was notified
 		var callCount int
@@ -118,6 +118,11 @@ func TestWatch_Happy(t *testing.T) {
 		nomad.JobsReturnsOnCall(1, []*models.Job{
 			{ID: "jupiter"},
 			{ID: "saturn"},
+		}, nil)
+		nomad.JobsReturnsOnCall(2, []*models.Job{
+			{ID: "jupiter"},
+			{ID: "saturn"},
+			{ID: "mars"},
 		}, nil)
 
 		go watcher.Watch()
@@ -147,7 +152,7 @@ func TestWatch_Happy(t *testing.T) {
 
 		// Check that the call counts for each function haven't been called
 		// more often than expected.
-		r.Equal(nomad.JobsCallCount(), 2)
+		r.Equal(nomad.JobsCallCount(), 3)
 	})
 
 	t.Run("When a subscriber subscribes to a specific topic it doesn't get notified for other topics", func(t *testing.T) {
@@ -177,6 +182,7 @@ func TestWatch_Happy(t *testing.T) {
 
 		expectedJobs := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
 		nomad.JobsReturnsOnCall(1, expectedJobs, nil)
+		nomad.JobsReturnsOnCall(2, expectedJobs, nil)
 
 		go watcher.Watch()
 
@@ -216,7 +222,7 @@ func TestWatch_Happy(t *testing.T) {
 		nomad.StreamReturns(eventCh, nil)
 
 		// Declare what the the fake client should return on the different calls
-		nomad.JobsReturnsOnCall(1, []*models.Job{
+		nomad.JobsReturns([]*models.Job{
 			{ID: "jupiter"},
 			{ID: "saturn"},
 		}, nil)
@@ -254,7 +260,7 @@ func TestWatch_Happy(t *testing.T) {
 		r.Eventually(func() bool {
 			return nomad.AllocationsCallCount() == 2 &&
 				nomad.DeploymentsCallCount() == 2 &&
-				nomad.JobsCallCount() == 2
+				nomad.JobsCallCount() == 4
 		}, time.Second*5, time.Microsecond*5)
 
 		expectedJobs := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
@@ -347,8 +353,8 @@ func TestWatch_Happy(t *testing.T) {
 		watcher := watcher.NewWatcher(state, nomad, time.Second*2)
 
 		// Setup expectations
-		expectedJobsInitialCall := []*models.Job{{ID: "jupiter"}}
-		expectedJobsUpdateForced := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
+		expectedJobsInitialCall := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
+		expectedJobsUpdateForced := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}, {ID: "mars"}}
 
 		// callCount indicates how often the subscriber was notified
 		var callCount int
@@ -371,6 +377,11 @@ func TestWatch_Happy(t *testing.T) {
 		nomad.JobsReturnsOnCall(1, []*models.Job{
 			{ID: "jupiter"},
 			{ID: "saturn"},
+		}, nil)
+		nomad.JobsReturnsOnCall(2, []*models.Job{
+			{ID: "jupiter"},
+			{ID: "saturn"},
+			{ID: "mars"},
 		}, nil)
 
 		go watcher.Watch()

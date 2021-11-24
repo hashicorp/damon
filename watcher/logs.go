@@ -33,8 +33,10 @@ func (w *Watcher) SubscribeToLogs(allocID, taskName, source string, notify func(
 		for {
 			select {
 			case frame := <-streamCh:
-				w.state.Logs = append(w.state.Logs, frame.Data...)
-				w.Notify(models.TopicLog)
+				if frame.Data != nil {
+					w.state.Logs = append(w.state.Logs, frame.Data...)
+					w.Notify(models.TopicLog)
+				}
 			case err := <-errorCh:
 				w.NotifyHandler(models.HandleError, err.Error())
 			case <-cancel:

@@ -27,7 +27,7 @@ func TestSubscription(t *testing.T) {
 		called = true
 	}
 
-	watcher.Subscribe(api.TopicJob, fn)
+	watcher.Subscribe(fn, api.TopicJob)
 	watcher.Notify(api.TopicJob)
 
 	r.True(called)
@@ -78,7 +78,7 @@ func TestHandlerSubscription(t *testing.T) {
 func TestWatch_Happy(t *testing.T) {
 	r := require.New(t)
 
-	t.Run("When there is a subscriber for a topic", func(t *testing.T) {
+	t.Run("When there is one subscriber for a topic", func(t *testing.T) {
 		// In this case, we expect that a subscriber that is subscribed
 		// to one of the following topics: Job, Deployment, Allocation
 		// is called whenever a event comes in.
@@ -104,7 +104,7 @@ func TestWatch_Happy(t *testing.T) {
 		}
 
 		// Subscribe the notifier to the Job topic
-		watcher.Subscribe(api.TopicJob, notifier)
+		watcher.Subscribe(notifier, api.TopicJob)
 
 		// Create an eventCh we can send events to for testing...
 		eventCh := make(chan *api.Events)
@@ -150,6 +150,87 @@ func TestWatch_Happy(t *testing.T) {
 		r.Equal(nomad.JobsCallCount(), 2)
 	})
 
+	t.Run("When the subscriber subscribes for multiple topics", func(t *testing.T) {
+		// In this case, we expect that a subscriber that is subscribed
+		// to multiple topics: Job & Allocation
+		// is called for all events that arrive.
+		// We expect that the subscriber is notfied initially for both topics
+		// before the stream starts and the state gets updated accordingly.
+
+		// Setup the watcher
+		nomad := &watcherfakes.FakeNomad{}
+		state := state.New()
+		watcher := watcher.NewWatcher(state, nomad, time.Second*2)
+
+		// Setup expectations
+		expectedJobsInitialCall := []*models.Job{{ID: "jupiter"}}
+		expectedJobsUpdated := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
+		expectedAllocsInitialCall := []*models.Alloc{{ID: "bumblebee"}}
+		expectedAllocsUpdated := []*models.Alloc{{ID: "prime"}, {ID: "megatron"}}
+
+		// callCount indicates how often the subscriber was notified
+		var callCount int
+		notifier := func() {
+			callCount++
+		}
+
+		// Subscribe the notifier to the Job topic and the Allocation topic
+		watcher.Subscribe(notifier, api.TopicJob, api.TopicAllocation)
+
+		// Create an eventCh we can send events to for testing...
+		eventCh := make(chan *api.Events)
+		defer close(eventCh)
+
+		// ...and let the fake nomad client return it.
+		nomad.StreamReturns(eventCh, nil)
+
+		// Declare what the the fake client should return on the different calls
+		nomad.JobsReturnsOnCall(0, []*models.Job{{ID: "jupiter"}}, nil)
+		nomad.JobsReturnsOnCall(1, []*models.Job{
+			{ID: "jupiter"},
+			{ID: "saturn"},
+		}, nil)
+
+		nomad.AllocationsReturnsOnCall(0, []*models.Alloc{{ID: "bumblebee"}}, nil)
+		nomad.AllocationsReturnsOnCall(1, []*models.Alloc{
+			{ID: "prime"},
+			{ID: "megatron"},
+		}, nil)
+
+		go watcher.Watch()
+
+		r.Eventually(func() bool {
+			return callCount == 2
+		}, time.Second*5, time.Microsecond*5)
+
+		r.Equal(expectedJobsInitialCall, state.Jobs)
+		r.Equal(expectedAllocsInitialCall, state.Allocations)
+
+		// We send events for all three topics we are intrested in:
+		events := &api.Events{
+			Events: []api.Event{
+				{
+					Topic: api.TopicJob,
+				},
+				{
+					Topic: api.TopicAllocation,
+				},
+			},
+		}
+		eventCh <- events
+
+		// We expected that the callCount eventually was called twice:
+		r.Eventually(func() bool {
+			return callCount == 4
+		}, time.Second*5, time.Microsecond*5)
+
+		r.Equal(expectedJobsUpdated, state.Jobs)
+		r.Equal(expectedAllocsUpdated, state.Allocations)
+
+		r.Equal(nomad.JobsCallCount(), 2)
+		r.Equal(nomad.AllocationsCallCount(), 2)
+	})
+
 	t.Run("When a subscriber subscribes to a specific topic it doesn't get notified for other topics", func(t *testing.T) {
 		// In this case we expect that a subscriber only gets notified for
 		// the topic it is subscribed to. Other topics shouldn't call the subscriber.
@@ -166,7 +247,7 @@ func TestWatch_Happy(t *testing.T) {
 		}
 
 		// Subscribe the notifier to the Deployment topic
-		watcher.Subscribe(api.TopicDeployment, notifier)
+		watcher.Subscribe(notifier, api.TopicDeployment)
 
 		// Create an eventCh we can send events to for testing...
 		eventCh := make(chan *api.Events)
@@ -295,7 +376,7 @@ func TestWatch_Happy(t *testing.T) {
 		// ...and let the fake nomad client return it.
 		nomad.StreamReturns(eventCh, nil)
 
-		watcher.Subscribe(api.TopicDeployment, notifierDepl)
+		watcher.Subscribe(notifierDepl, api.TopicDeployment)
 
 		go watcher.Watch()
 
@@ -319,7 +400,7 @@ func TestWatch_Happy(t *testing.T) {
 		r.Equal(callCountJob, 0)
 
 		// We overwrite the subscriber
-		watcher.Subscribe(api.TopicJob, notifierJob)
+		watcher.Subscribe(notifierJob, api.TopicJob)
 
 		// Send events again
 		eventCh <- events

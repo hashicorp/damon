@@ -11,7 +11,7 @@ import (
 // The goroutine will be stopped whenever a new subscription happens.
 func (w *Watcher) SubscribeToNamespaces(notify func()) {
 	w.updateNamespaces()
-	w.Subscribe(models.TopicNamespace, notify)
+	w.Subscribe(notify, models.TopicNamespace)
 	w.Notify(models.TopicNamespace)
 
 	stop := make(chan struct{})

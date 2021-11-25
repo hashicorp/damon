@@ -20,7 +20,7 @@ func (w *Watcher) SubscribeToLogs(allocID, taskName, source string, notify func(
 		return
 	}
 
-	w.Subscribe(models.TopicLog, notify)
+	w.Subscribe(notify, models.TopicLog)
 	w.Notify(models.TopicLog)
 
 	cancel := make(chan struct{})

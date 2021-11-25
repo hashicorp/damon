@@ -46,7 +46,7 @@ type Watcher struct {
 }
 
 type subscriber struct {
-	topic  api.Topic
+	topics []api.Topic
 	notify func()
 }
 
@@ -63,9 +63,9 @@ func NewWatcher(state *state.State, nomad Nomad, interval time.Duration) *Watche
 
 // Subscribe subscribes a function to a topic. This function should always be
 // called before Watcher.activities.Add().
-func (w *Watcher) Subscribe(topic api.Topic, notify func()) {
+func (w *Watcher) Subscribe(notify func(), topics ...api.Topic) {
 	w.subscriber = &subscriber{
-		topic:  topic,
+		topics: topics,
 		notify: notify,
 	}
 
@@ -100,8 +100,10 @@ func (w *Watcher) NotifyHandler(handler models.Handler, msg string, args ...inte
 // that data got updated in the state.
 func (w *Watcher) Notify(topic api.Topic) {
 	if w.subscriber != nil && w.subscriber.notify != nil {
-		if w.subscriber.topic == topic {
-			w.subscriber.notify()
+		for _, t := range w.subscriber.topics {
+			if t == topic {
+				w.subscriber.notify()
+			}
 		}
 	}
 }

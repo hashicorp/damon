@@ -127,28 +127,16 @@ func (w *Watcher) Watch() {
 	}
 
 	for {
-		select {
-		case event, open := <-eventCh:
-			if !open {
-				w.NotifyHandler(models.HandleFatal, "event stream closed")
-				return
-			}
+		event, open := <-eventCh
+		if !open {
+			w.NotifyHandler(models.HandleFatal, "event stream closed")
+			return
+		}
 
-			for _, e := range event.Events {
-				w.update(e.Topic)
-			}
-		case topic := <-w.forceUpdate:
-			w.update(topic)
-
+		for _, e := range event.Events {
+			w.update(e.Topic)
 		}
 	}
-}
-
-// ForceUpdate forces the event stream loop
-// to update the state and notify the current
-// subscriber.
-func (w *Watcher) ForceUpdate() {
-	w.forceUpdate <- w.subscriber.topic
 }
 
 func (w *Watcher) update(topic api.Topic) {

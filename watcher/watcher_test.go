@@ -334,63 +334,6 @@ func TestWatch_Happy(t *testing.T) {
 		// The Deployment Call Count should remain the same.
 		r.Equal(callCountDepl, 2)
 	})
-
-	t.Run("When the watch loop retrieves a force updated signal", func(t *testing.T) {
-		// In this case the the watch loop can retrieve a
-		// force update signal. This is, when w.ForceUpdate is called.
-		// On a force update the latest resources are fetched from
-		// the nomad cluster and the subscriber gets notified,
-		// regardless if there are any events or not.
-
-		nomad := &watcherfakes.FakeNomad{}
-		state := state.New()
-		watcher := watcher.NewWatcher(state, nomad, time.Second*2)
-
-		// Setup expectations
-		expectedJobsInitialCall := []*models.Job{{ID: "jupiter"}}
-		expectedJobsUpdateForced := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
-
-		// callCount indicates how often the subscriber was notified
-		var callCount int
-		notifier := func() {
-			callCount++
-		}
-
-		// Subscribe the notifier to the Job topic
-		watcher.Subscribe(api.TopicJob, notifier)
-
-		// Create an eventCh we can send events to for testing...
-		eventCh := make(chan *api.Events)
-		defer close(eventCh)
-
-		// ...and let the fake nomad client return it.
-		nomad.StreamReturns(eventCh, nil)
-
-		// Declare what the the fake client should return on the different calls
-		nomad.JobsReturnsOnCall(0, []*models.Job{{ID: "jupiter"}}, nil)
-		nomad.JobsReturnsOnCall(1, []*models.Job{
-			{ID: "jupiter"},
-			{ID: "saturn"},
-		}, nil)
-
-		go watcher.Watch()
-
-		// Make sure the inital call happend
-		r.Eventually(func() bool {
-			return callCount == 1
-		}, time.Second*5, time.Microsecond*5)
-
-		r.Equal(expectedJobsInitialCall, state.Jobs)
-
-		// Force update the resources for the current subscribed topic (Job)
-		watcher.ForceUpdate()
-
-		r.Eventually(func() bool {
-			return callCount == 2
-		}, time.Second*5, time.Microsecond*5)
-
-		r.Equal(expectedJobsUpdateForced, state.Jobs)
-	})
 }
 
 func TestWatch_Sad(t *testing.T) {

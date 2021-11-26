@@ -22,7 +22,7 @@ type Client interface {
 // Watcher ...
 //go:generate counterfeiter . Watcher
 type Watcher interface {
-	Subscribe(topic api.Topic, notify func())
+	Subscribe(notify func(), topics ...api.Topic)
 	Unsubscribe()
 
 	SubscribeHandler(handler models.Handler, handle func(string, ...interface{}))
@@ -30,8 +30,6 @@ type Watcher interface {
 	SubscribeToTaskGroups(jobID string, notify func()) error
 	SubscribeToJobStatus(jobID string, notify func()) error
 	SubscribeToLogs(allocID, taskName, source string, notify func())
-
-	ForceUpdate()
 }
 
 type View struct {

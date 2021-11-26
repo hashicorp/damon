@@ -32,10 +32,7 @@ func (v *View) Deployments() {
 		update()
 	}
 
-	v.Watcher.Subscribe(api.TopicDeployment, update)
-	if len(v.state.Deployments) == 0 {
-		v.Watcher.ForceUpdate()
-	}
+	v.Watcher.Subscribe(update, api.TopicDeployment)
 
 	update()
 

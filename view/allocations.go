@@ -34,7 +34,7 @@ func (v *View) Allocations(jobID string) {
 
 	v.components.AllocationTable.Props.JobID = jobID
 
-	v.Watcher.Subscribe(api.TopicAllocation, update)
+	v.Watcher.Subscribe(update, api.TopicAllocation)
 
 	update()
 

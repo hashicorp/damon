@@ -21,7 +21,6 @@ var (
 
 type Selections struct {
 	Namespace DropDown
-	Props     *SelectionsProps
 
 	state *state.State
 	slot  *tview.Flex

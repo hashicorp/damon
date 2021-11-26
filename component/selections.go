@@ -21,29 +21,19 @@ var (
 
 type Selections struct {
 	Namespace DropDown
-	Props     *SelectionsProps
 
 	state *state.State
 	slot  *tview.Flex
 }
 
-type SelectionsProps struct {
-	Rerender func()
-}
-
 func NewSelections(state *state.State) *Selections {
 	return &Selections{
 		Namespace: primitives.NewDropDown(labelNamespaceDropdown),
-		Props:     &SelectionsProps{},
 		state:     state,
 	}
 }
 
 func (s *Selections) Render() error {
-	if s.Props.Rerender == nil {
-		return ErrComponentPropsNotSet
-	}
-
 	if s.slot == nil {
 		return ErrComponentNotBound
 	}
@@ -68,7 +58,6 @@ func (s *Selections) selected(text string, index int) {
 
 func (s *Selections) rerender(text string, index int) {
 	s.state.SelectedNamespace = text
-	s.Props.Rerender()
 }
 
 func convert(list []*models.Namespace) []string {

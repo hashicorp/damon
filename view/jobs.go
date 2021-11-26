@@ -26,6 +26,7 @@ func (v *View) Jobs() {
 		table.Props.Data = v.filterJobs()
 		table.Props.Namespace = v.state.SelectedNamespace
 		table.Render()
+
 		v.Draw()
 	}
 
@@ -46,10 +47,7 @@ func (v *View) Jobs() {
 		}
 	}
 
-	v.Watcher.Subscribe(api.TopicJob, update)
-	if len(v.state.Jobs) == 0 {
-		v.Watcher.ForceUpdate()
-	}
+	v.Watcher.Subscribe(update, api.TopicJob, api.TopicAllocation)
 
 	update()
 

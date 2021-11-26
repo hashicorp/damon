@@ -124,9 +124,6 @@ func (v *View) Init(version string) {
 
 	// Selections
 	v.components.Selections.Bind(v.Layout.Elements.Dropdowns)
-	v.components.Selections.Props.Rerender = func() {
-		v.Watcher.ForceUpdate()
-	}
 
 	v.components.Selections.Render()
 

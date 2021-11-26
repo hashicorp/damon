@@ -11,7 +11,7 @@ import (
 // a new subscription happens.
 func (w *Watcher) SubscribeToJobStatus(jobID string, notify func()) error {
 	w.updateJobStatus(jobID)
-	w.Subscribe(models.TopicJobStatus, notify)
+	w.Subscribe(notify, models.TopicJobStatus)
 	w.Notify(models.TopicJobStatus)
 
 	stop := make(chan struct{})

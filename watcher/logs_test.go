@@ -40,7 +40,7 @@ func TestSubscribeToLogs_Happy(t *testing.T) {
 	watcher := watcher.NewWatcher(state, nomad, time.Millisecond*250)
 
 	// A new subscription will close the cancel chan
-	defer watcher.Subscribe(api.TopicJob, func() {})
+	defer watcher.Subscribe(func() {}, api.TopicJob)
 
 	streamChan := make(chan *api.StreamFrame)
 	errChan := make(chan error)
@@ -140,7 +140,7 @@ func TestSubscribeToLogs_Sad(t *testing.T) {
 
 		watcher := watcher.NewWatcher(state, nomad, time.Millisecond*250)
 
-		defer watcher.Subscribe(api.TopicJob, func() {})
+		defer watcher.Subscribe(func() {}, api.TopicJob)
 
 		streamChan := make(chan *api.StreamFrame)
 		errChan := make(chan error)

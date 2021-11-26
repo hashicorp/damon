@@ -37,7 +37,7 @@ func (v *View) TaskEvents(allocID string) {
 		v.Draw()
 	}
 
-	v.Watcher.Subscribe(api.TopicAllocation, update)
+	v.Watcher.Subscribe(update, api.TopicAllocation)
 
 	update()
 

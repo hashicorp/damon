@@ -34,11 +34,6 @@ func TestSelections_Happy(t *testing.T) {
 
 	selections.Bind(tview.NewFlex())
 
-	var rerenderCalled bool
-	selections.Props.Rerender = func() {
-		rerenderCalled = true
-	}
-
 	dropdown.PrimitiveReturns(tview.NewDropDown())
 
 	err := selections.Render()
@@ -52,13 +47,12 @@ func TestSelections_Happy(t *testing.T) {
 	r.Equal(optIndex, 1)
 
 	actualRerender("text", 0)
-	r.True(rerenderCalled)
 }
 
 func TestSelections_Sad(t *testing.T) {
-	r := require.New(t)
-
 	t.Run("When the component isn't bound", func(t *testing.T) {
+		r := require.New(t)
+
 		state := state.New()
 		state.Namespaces = []*models.Namespace{}
 		dropdown := &componentfakes.FakeDropDown{}
@@ -78,26 +72,4 @@ func TestSelections_Sad(t *testing.T) {
 		// It is the correct error
 		r.True(errors.Is(err, component.ErrComponentNotBound))
 	})
-
-	t.Run("When Rerender is not set", func(t *testing.T) {
-		state := state.New()
-		state.Namespaces = []*models.Namespace{}
-		dropdown := &componentfakes.FakeDropDown{}
-
-		selections := component.NewSelections(state)
-		selections.Namespace = dropdown
-
-		selections.Bind(tview.NewFlex())
-		dropdown.PrimitiveReturns(tview.NewDropDown())
-
-		err := selections.Render()
-		r.Error(err)
-
-		// It provides the correct error message
-		r.EqualError(err, "component properties not set")
-
-		// It is the correct error
-		r.True(errors.Is(err, component.ErrComponentPropsNotSet))
-	})
-
 }

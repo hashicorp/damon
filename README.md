@@ -83,12 +83,14 @@ On every table or text view, you can use:
 
 - Show Allocations for a Job: `<ENTER>` (on the selected job)
 - Show TaskGroups for a Job: `<t>` (on the selected job)
+- Show information for a Job: `<i>` (on the selected job)
 - Filter Job: `</>` (on the selected job)
 
 ### Allocation View Commands
 
 - Show logs on `STDOUT` for an allocation: `<ENTER>`
 - Show logs on `STDERR` for an allocation: `<ctrl-e>`
+- Show events for an allocation: `<e>`
 
 ### Log View
 

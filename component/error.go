@@ -20,7 +20,7 @@ type ErrorProps struct {
 }
 
 func NewError() *Error {
-	buttons := []string{"Quit"}
+	buttons := []string{"Quit", "OK"}
 	modal := primitive.NewModal("Error", buttons, tcell.ColorDarkRed)
 
 	return &Error{

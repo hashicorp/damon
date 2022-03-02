@@ -33,7 +33,7 @@ func TestError_Happy(t *testing.T) {
 	actualDone := modal.SetDoneFuncArgsForCall(0)
 	text := modal.SetTextArgsForCall(0)
 
-	actualDone(0, "Quit")
+	actualDone(0, "buttonName")
 
 	r.True(doneCalled)
 	r.Equal(text, "error")

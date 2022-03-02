@@ -130,7 +130,14 @@ func (v *View) Init(version string) {
 	// Error
 	v.components.Error.Bind(v.Layout.Pages)
 	v.components.Error.Props.Done = func(buttonIndex int, buttonLabel string) {
-		v.Layout.Container.Stop()
+		if buttonLabel == "Quit" {
+			v.Layout.Container.Stop()
+			return
+		}
+
+		v.Layout.Pages.RemovePage(component.PageNameError)
+		v.Layout.Container.SetFocus(v.state.Elements.TableMain)
+		v.GoBack()
 	}
 
 	// Info

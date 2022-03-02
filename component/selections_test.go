@@ -59,7 +59,6 @@ func TestSelections_Sad(t *testing.T) {
 
 		selections := component.NewSelections(state)
 		selections.Namespace = dropdown
-		selections.Props.Rerender = func() {}
 
 		dropdown.PrimitiveReturns(tview.NewDropDown())
 

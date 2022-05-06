@@ -1,0 +1,276 @@
+name: build
+
+on:
+  push:
+    branches:
+      - "main"
+      - "crt-onboarding"
+  workflow_dispatch:
+
+env:
+  PKG_NAME: "damon"
+
+jobs:
+  get-go-version:
+    name: "Determine Go toolchain version"
+    runs-on: ubuntu-latest
+    outputs:
+      go-version: ${{ steps.get-go-version.outputs.go-version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Determine Go version
+        id: get-go-version
+        # We use .go-version as our source of truth for current Go
+        # version, because "goenv" can react to it automatically.
+        run: |
+          if [[ ! -f .go-version ]]; then
+            echo "::error::File not found: .go-version"
+            exit 1
+          fi
+          echo "Building with Go $(cat .go-version)"
+          echo "::set-output name=go-version::$(cat .go-version)"
+
+  get-product-version:
+    runs-on: ubuntu-latest
+    outputs:
+      product-version: ${{ steps.get-product-version.outputs.product-version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: get product version
+        id: get-product-version
+        run: |
+          make version
+          echo "::set-output name=product-version::$(make version)"
+
+  generate-metadata-file:
+    needs: get-product-version
+    runs-on: ubuntu-latest
+    outputs:
+      filepath: ${{ steps.generate-metadata-file.outputs.filepath }}
+    steps:
+      - name: "Checkout directory"
+        uses: actions/checkout@v2
+      - name: Generate metadata file
+        id: generate-metadata-file
+        uses: hashicorp/actions-generate-metadata@v1
+        with:
+          version: ${{ needs.get-product-version.outputs.product-version }}
+          product: ${{ env.PKG_NAME }}
+          repositoryOwner: "hashicorp"
+      - uses: actions/upload-artifact@v2
+        if: ${{ !env.ACT }}
+        with:
+          name: metadata.json
+          path: ${{ steps.generate-metadata-file.outputs.filepath }}
+
+  build-other:
+    needs:
+      - get-go-version
+      - get-product-version
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos:
+          - "freebsd"
+          - "windows"
+        goarch:
+          - "amd64"
+          - "arm"
+          - "arm64"
+        exclude:
+          - goos: "windows"
+            goarch: "arm"
+          - goos: "windows"
+            goarch: "arm64"
+      fail-fast: true
+
+    name: Go ${{ needs.get-go-version.outputs.go-version }} ${{ matrix.goos }} ${{ matrix.goarch }} build
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          mkdir -p out
+          make bin
+          zip -r -j out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip $(make binpath)
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ !env.ACT }}
+        with:
+          name: ${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+
+  build-linux:
+    needs:
+      - get-go-version
+      - get-product-version
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: ["linux"]
+        goarch: ["arm", "arm64", "amd64"]
+      fail-fast: true
+
+    name: Go ${{ needs.get-go-version.outputs.go-version }} ${{ matrix.goos }} ${{ matrix.goarch }} build
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          mkdir -p out
+          make bin
+          zip -r -j out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip $(make binpath)
+          echo "BIN_PATH=$(make binpath)" >> $GITHUB_ENV
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ !env.ACT }}
+        with:
+          name: ${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+
+      - name: Package
+        if: ${{ matrix.goos == 'linux' }}
+        uses: hashicorp/actions-packaging-linux@v1
+        with:
+          name: "damon"
+          description: "Damon is a terminal dashboard for HashiCorp Nomad."
+          arch: ${{ matrix.goarch }}
+          version: ${{ needs.get-product-version.outputs.product-version }}
+          maintainer: "HashiCorp"
+          homepage: "https://github.com/hashicorp/damon"
+          license: "MPL-2.0"
+          binary: ${{ env.BIN_PATH }}
+          deb_depends: "openssl,git"
+          rpm_depends: "openssl,git"
+
+      - name: Set Package Names
+        if: ${{ (matrix.goos == 'linux') && (!env.ACT) }}
+        run: |
+          echo "RPM_PACKAGE=$(basename out/*.rpm)" >> $GITHUB_ENV
+          echo "DEB_PACKAGE=$(basename out/*.deb)" >> $GITHUB_ENV
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ (matrix.goos == 'linux') && (!env.ACT) }}
+        with:
+          name: ${{ env.RPM_PACKAGE }}
+          path: out/${{ env.RPM_PACKAGE }}
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ (matrix.goos == 'linux') && (!env.ACT) }}
+        with:
+          name: ${{ env.DEB_PACKAGE }}
+          path: out/${{ env.DEB_PACKAGE }}
+
+  build-darwin:
+    needs:
+      - get-go-version
+      - get-product-version
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        goos: [darwin]
+        goarch: ["amd64", "arm64"]
+      fail-fast: true
+
+    name: Go ${{ needs.get-go-version.outputs.go-version }} ${{ matrix.goos }} ${{ matrix.goarch }} build
+
+    env:
+      GOOS: ${{ matrix.goos }}
+      GOARCH: ${{ matrix.goarch }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+
+      - name: Build
+        run: |
+          mkdir -p out
+          make bin
+          zip -r -j out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip $(make binpath)
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ !env.ACT }}
+        with:
+          name: ${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+
+  build-docker-default:
+    name: Docker ${{ matrix.arch }} default release build
+    needs:
+      - get-product-version
+      - build-linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: ["arm", "arm64", "amd64"]
+      fail-fast: false
+    env:
+      repo: ${{ github.event.repository.name }}
+      version: ${{ needs.get-product-version.outputs.product-version }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker Build (Action)
+        uses: hashicorp/actions-docker-build@v1
+        with:
+          # Add smoke test here. Below is a sample smoke test that runs the built image
+          # and validates the version.
+          smoke_test: |
+            TEST_VERSION="$(docker run "${IMAGE_NAME}" | awk '/Damon/{print $2}')"
+            TEST_VERSION=${TEST_VERSION#v}
+            if [ "${TEST_VERSION}" != "${version}" ]; then
+              echo "Test FAILED - expected \"${version}\" got \"${TEST_VERSION}\""
+              exit 1
+            fi
+            echo "Test PASSED"
+          version: ${{ env.version }}
+          target: release
+          arch: ${{ matrix.arch }}
+          tags: |
+            docker.io/hashicorp/${{ env.repo }}:${{ env.version }}
+            986891699432.dkr.ecr.us-east-1.amazonaws.com/hashicorp/${{ env.repo }}:${{ env.version }}
+
+          dev_tags: |
+            hashicorppreview/${{ env.repo }}:${{ env.version }}-dev
+            docker.io/hashicorppreview/${{ env.repo }}:${{ env.version }}-${{ github.sha }}
+
+  build-docker-redhat:
+    name: Docker ${{ matrix.arch }} redhat release build
+    needs:
+      - get-product-version
+      - build-linux
+    runs-on: ubuntu-latest
+    env:
+      repo: ${{ github.event.repository.name }}
+      version: ${{ needs.get-product-version.outputs.product-version }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/actions-docker-build@v1
+        with:
+          version: ${{ env.version }}
+          target: release
+          arch: amd64
+          redhat_tag: scan.connect.redhat.com/ospid-62211e0d8bf2cabc69a39c7d/${{ env.repo }}:${{ env.version }}-ubi

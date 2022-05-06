@@ -1,0 +1,7 @@
+# Blanket ownership of all PRs.
+* @hcjulz @angrycub @DerekStrickland @jazzyfresh @jrasell @lgfa29 @schmichael @tgross @shoenig
+
+# release configuration
+# TODO (derek) - Uncomment once we are closer to complete.
+# /.release/                              @hashicorp/release-engineering
+# /.github/workflows/build.yml            @hashicorp/release-engineering

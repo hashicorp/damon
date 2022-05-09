@@ -39,6 +39,17 @@ install-osx:
 test:
 	go test ./...
 
+
+pkg/%/damon: GO_OUT ?= $@
+pkg/%/damon: ## Build Nomad Autoscaler for GOOS_GOARCH, e.g. pkg/linux_amd64/nomad
+	@echo "==> Building $@ with tags $(GO_TAGS)..."
+	@CGO_ENABLED=0 \
+		GOOS=$(firstword $(subst _, ,$*)) \
+		GOARCH=$(lastword $(subst _, ,$*)) \
+		go build -trimpath -ldflags $(GO_LDFLAGS) -tags "$(GO_TAGS)" -o $(GO_OUT)
+
+pkg/windows_%/nomad-autoscaler: GO_OUT = $@.exe
+
 # Common Dev make target.
 # Includes GO_LDFLAGS for convenience.
 # Deploys dev build to GOPATH.

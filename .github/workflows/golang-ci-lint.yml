@@ -14,9 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Determine Go version
+        id: get-go-version
+        # We use .go-version as our source of truth for current Go
+        # version, because "goenv" can react to it automatically.
+        run: |
+          if [[ ! -f .go-version ]]; then
+            echo "::error::File not found: .go-version"
+            exit 1
+          fi
+          echo "Building with Go $(cat .go-version)"
+          echo "::set-output name=go-version::$(cat .go-version)"
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.16'
+          go-version:  ${{ steps.get-go-version.outputs.go-version }}
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3.1.0
         with:

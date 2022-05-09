@@ -4,7 +4,7 @@ project "damon" {
   // the team key is not used by CRT currently
   team = "nomad"
   slack {
-    notification_channel = "C01064E59HN"
+    notification_channel = "C03B5EWFW01"
   }
   github {
     organization = "hashicorp"

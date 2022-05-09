@@ -158,8 +158,8 @@ jobs:
           homepage: "https://github.com/hashicorp/damon"
           license: "MPL-2.0"
           binary: ${{ env.BIN_PATH }}
-          deb_depends: "openssl,git"
-          rpm_depends: "openssl,git"
+          deb_depends: "openssl"
+          rpm_depends: "openssl"
 
       - name: Set Package Names
         if: ${{ (matrix.goos == 'linux') && (!env.ACT) }}
@@ -241,7 +241,7 @@ jobs:
             TEST_VERSION="$(docker run "${IMAGE_NAME}" | awk '/Damon/{print $2}')"
             TEST_VERSION=${TEST_VERSION#v}
             if [ "${TEST_VERSION}" != "${version}" ]; then
-              echo "Test FAILED - expected \"${version}\" got \"${TEST_VERSION}\""
+              echo "::error file=smoke_test,line=1,endLine=1,title=Version Check Failed::expected \"${version}\" got \"${TEST_VERSION}\""
               exit 1
             fi
             echo "Test PASSED"
@@ -250,10 +250,9 @@ jobs:
           arch: ${{ matrix.arch }}
           tags: |
             docker.io/hashicorp/${{ env.repo }}:${{ env.version }}
-            986891699432.dkr.ecr.us-east-1.amazonaws.com/hashicorp/${{ env.repo }}:${{ env.version }}
 
           dev_tags: |
-            hashicorppreview/${{ env.repo }}:${{ env.version }}-dev
+            docker.io/hashicorppreview/${{ env.repo }}:${{ env.version }}-dev
             docker.io/hashicorppreview/${{ env.repo }}:${{ env.version }}-${{ github.sha }}
 
   build-docker-redhat:

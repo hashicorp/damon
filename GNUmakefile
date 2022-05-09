@@ -17,8 +17,6 @@ REVISION = $(shell git rev-parse HEAD)
 
 # Get local ARCH; on Intel Mac, 'uname -m' returns x86_64 which we turn into amd64.
 # Not using 'go env GOOS/GOARCH' here so 'make docker' will work without local Go install.
-# ARCH     = $(shell A=$$(uname -m); [ $$A = x86_64 ] && A=amd64; echo $$A)
-# OS       = $(shell uname | tr [[:upper:]] [[:lower:]])
 OS   = $(strip $(shell echo -n $${GOOS:-$$(uname | tr [[:upper:]] [[:lower:]])}))
 ARCH = $(strip $(shell echo -n $${GOARCH:-$$(A=$$(uname -m); [ $$A = x86_64 ] && A=amd64 || [ $$A = aarch64 ] && A=arm64 ; echo $$A)}))
 PLATFORM ?= $(OS)/$(ARCH)
@@ -117,7 +115,6 @@ docker-login:
 docker-pull-staging:
 	@docker pull $(CRT_STAGING_REGISTRY)/$(REPO_NAME)/release:$(VERSION)_$(GIT_SHA)
 
-SLACK_CHANNEL = $(shell ./build-scripts/slack.sh)
 staging:
 	@bob trigger-promotion \
 	  --product-name=$(PRODUCT_NAME) \
@@ -127,7 +124,7 @@ staging:
 	  --product-version=$(VERSION) \
 	  --sha=$(GIT_SHA) \
 	  --environment=nomad-oss \
-	  --slack-channel=$(SLACK_CHANNEL) \
+	  --slack-channel=CUYKT2A73 \
 	  staging
 
 download:
@@ -139,44 +136,44 @@ download:
 
 verify-rpm:
 	@docker run \
-		-v  $(CURDIR)/build-scripts:/local \
-		-e  ARTIFACTORY_TOKEN=$(ARTIFACTORY_TOKEN) \
-		-e  ARTIFACTORY_USER=$(ARTIFACTORY_USER) \
-		-e  REPO_NAME=$(REPO_NAME) \
-		-e  VERSION=$(VERSION) \
-		-e  GIT_SHA=$(GIT_SHA) \
+		-v $(CURDIR)/build-scripts:/local \
+		-e ARTIFACTORY_TOKEN=$(ARTIFACTORY_TOKEN) \
+		-e ARTIFACTORY_USER=$(ARTIFACTORY_USER) \
+		-e REPO_NAME=$(REPO_NAME) \
+		-e VERSION=$(VERSION) \
+		-e GIT_SHA=$(GIT_SHA) \
 		centos:7 \
 		/bin/bash /local/verify-rpm.sh
 
 debug-rpm:
 	@docker run -it \
-		-v  $(CURDIR)/build-scripts:/local \
-		-e  ARTIFACTORY_TOKEN=$(ARTIFACTORY_TOKEN) \
-		-e  ARTIFACTORY_USER=$(ARTIFACTORY_USER) \
-		-e  REPO_NAME=$(REPO_NAME) \
-		-e  VERSION=$(VERSION) \
-		-e  GIT_SHA=$(GIT_SHA) \
+		-v $(CURDIR)/build-scripts:/local \
+		-e ARTIFACTORY_TOKEN=$(ARTIFACTORY_TOKEN) \
+		-e ARTIFACTORY_USER=$(ARTIFACTORY_USER) \
+		-e REPO_NAME=$(REPO_NAME) \
+		-e VERSION=$(VERSION) \
+		-e GIT_SHA=$(GIT_SHA) \
 		centos:7 \
-		/bin/bash /local/verify-rpm.sh
+		/bin/bash
 
 verify-deb:
 	@docker run \
-		-v  $(CURDIR)/build-scripts:/local \
-		-e  ARTIFACTORY_TOKEN=$(ARTIFACTORY_TOKEN) \
-		-e  ARTIFACTORY_USER=$(ARTIFACTORY_USER) \
-		-e  REPO_NAME=$(REPO_NAME) \
-		-e  VERSION=$(VERSION) \
-		-e  GIT_SHA=$(GIT_SHA) \
+		-v $(CURDIR)/build-scripts:/local \
+		-e ARTIFACTORY_TOKEN=$(ARTIFACTORY_TOKEN) \
+		-e ARTIFACTORY_USER=$(ARTIFACTORY_USER) \
+		-e REPO_NAME=$(REPO_NAME) \
+		-e VERSION=$(VERSION) \
+		-e GIT_SHA=$(GIT_SHA) \
 		ubuntu \
 		/bin/bash /local/verify-deb.sh
 
 debug-deb:
 	@docker run -it \
-		-v  $(CURDIR)/build-scripts:/local \
-		-e  ARTIFACTORY_TOKEN=$(ARTIFACTORY_TOKEN) \
-		-e  ARTIFACTORY_USER=$(ARTIFACTORY_USER) \
-		-e  REPO_NAME=$(REPO_NAME) \
-		-e  VERSION=$(VERSION) \
-		-e  GIT_SHA=$(GIT_SHA) \
+		-v $(CURDIR)/build-scripts:/local \
+		-e ARTIFACTORY_TOKEN=$(ARTIFACTORY_TOKEN) \
+		-e ARTIFACTORY_USER=$(ARTIFACTORY_USER) \
+		-e REPO_NAME=$(REPO_NAME) \
+		-e VERSION=$(VERSION) \
+		-e GIT_SHA=$(GIT_SHA) \
 		ubuntu \
 		/bin/bash

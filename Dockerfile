@@ -45,9 +45,7 @@ COPY dist/$TARGETOS/$TARGETARCH/damon /bin/
 
 # Create a non-root user to run the software.
 RUN addgroup $PRODUCT_NAME && \
-    adduser -S -G $PRODUCT_NAME $PRODUCT_NAME && \
-    mkdir -p /home/$PRODUCT_NAME/.cache && \
-    chown $PRODUCT_NAME /home/$PRODUCT_NAME/.cache
+    adduser -S -G $PRODUCT_NAME $PRODUCT_NAME
 
 USER $PRODUCT_NAME
 ENTRYPOINT ["/bin/damon"]

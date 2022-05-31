@@ -11,7 +11,6 @@ project "damon" {
     repository   = "damon"
     release_branches = [
       "main",
-      "crt-onboarding",
     ]
   }
 }

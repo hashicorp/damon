@@ -99,7 +99,7 @@ jobs:
           maintainer: "HashiCorp"
           homepage: "https://github.com/hashicorp/damon"
           license: "MPL-2.0"
-          binary: ${{ env.BIN_PATH }}
+          binary: pkg/${{ matrix.goos }}_${{ matrix.goarch }}/${{ env.PKG_NAME }}
           deb_depends: "openssl"
           rpm_depends: "openssl"
       - name: Set Package Names
@@ -179,7 +179,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-                    make pkg/${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          make pkg/${{ matrix.goos }}_${{ matrix.goarch }}.zip
           mv \
             pkg/${{ matrix.goos }}_${{ matrix.goarch }}.zip \
             ${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
@@ -211,7 +211,6 @@ jobs:
         with:
           smoke_test: |
             TEST_VERSION="$(docker run "${IMAGE_NAME}" | awk '/Damon/{print $2}')"
-            TEST_VERSION=${TEST_VERSION#v}
             if [ "${TEST_VERSION}" != "v${version}" ]; then
               echo "::error file=smoke_test,line=1,endLine=1,title=Version Check Failed::expected \"${version}\" got \"${TEST_VERSION}\""
               exit 1

@@ -210,7 +210,7 @@ jobs:
         uses: hashicorp/actions-docker-build@v1
         with:
           smoke_test: |
-            TEST_VERSION="$(docker run "${IMAGE_NAME}" | awk '/Damon/{print $2}')"
+            TEST_VERSION="$(docker run "${IMAGE_NAME}" --version | awk '/Damon/{print $2}')"
             if [ "${TEST_VERSION}" != "v${version}" ]; then
               echo "::error file=smoke_test,line=1,endLine=1,title=Version Check Failed::expected \"${version}\" got \"${TEST_VERSION}\""
               exit 1

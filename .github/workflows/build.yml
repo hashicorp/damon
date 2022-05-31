@@ -55,7 +55,6 @@ jobs:
           name: metadata.json
           path: ${{ steps.generate-metadata-file.outputs.filepath }}
 
-
   build-linux:
     needs:
       - get-go-version

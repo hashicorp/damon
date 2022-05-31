@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/hcjulz/damon/internal/pkg/version"
 	"github.com/hcjulz/damon/nomad"
 	"github.com/hcjulz/damon/state"
 	"github.com/hcjulz/damon/styles"
+	"github.com/hcjulz/damon/version"
 	"github.com/hcjulz/damon/view"
 	"github.com/hcjulz/damon/watcher"
 	"github.com/jessevdk/go-flags"
@@ -36,7 +36,7 @@ func main() {
 	}
 
 	if opts.Version {
-		fmt.Println("Damon", version.Version)
+		fmt.Println("Damon", version.GetHumanVersion())
 		os.Exit(0)
 	}
 
@@ -95,7 +95,7 @@ func main() {
 	go watcher.Watch()
 
 	view := view.New(components, watcher, nomadClient, state)
-	view.Init(version.Version)
+	view.Init(version.GetHumanVersion())
 
 	err = view.Layout.Container.Run()
 	if err != nil {

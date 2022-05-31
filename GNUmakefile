@@ -1,116 +1,63 @@
 SHELL = bash
+default: help
 
-GIT_COMMIT=$$(git rev-parse --short HEAD)
-GIT_BRANCH = $$(git branch --show-current)
-GIT_SHA    = $$(git rev-parse HEAD)
-GIT_DIRTY=$$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
-GIT_IMPORT="github.com/hashicorp/nomad-pack/internal/pkg/version"
-GO_LDFLAGS="-s -w -X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)"
-VERSION = $(shell ./build-scripts/version.sh internal/pkg/version/version.go)
+GIT_COMMIT := $(shell git rev-parse --short HEAD)
+GIT_DIRTY := $(if $(shell git status --porcelain),+CHANGES)
 
-REPO_NAME    ?= $(shell basename "$(CURDIR)")
-PRODUCT_NAME ?= $(REPO_NAME)
-BIN_NAME     ?= $(PRODUCT_NAME)
+GO_LDFLAGS := "-X github.com/hcjulz/damon/version.GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)"
 
-# Get latest revision (no dirty check for now).
-REVISION = $(shell git rev-parse HEAD)
+HELP_FORMAT="    \033[36m%-25s\033[0m %s\n"
+.PHONY: help
+help: ## Display this usage information
+	@echo "Valid targets:"
+	@grep -E '^[^ ]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		sort | \
+		awk 'BEGIN {FS = ":.*?## "}; \
+			{printf $(HELP_FORMAT), $$1, $$2}'
+	@echo ""
 
-# Get local ARCH; on Intel Mac, 'uname -m' returns x86_64 which we turn into amd64.
-# Not using 'go env GOOS/GOARCH' here so 'make docker' will work without local Go install.
-OS   = $(strip $(shell echo -n $${GOOS:-$$(uname | tr [[:upper:]] [[:lower:]])}))
-ARCH = $(strip $(shell echo -n $${GOARCH:-$$(A=$$(uname -m); [ $$A = x86_64 ] && A=amd64 || [ $$A = aarch64 ] && A=arm64 ; echo $$A)}))
-PLATFORM ?= $(OS)/$(ARCH)
-DIST     = dist/$(PLATFORM)
-BIN      = $(DIST)/$(BIN_NAME)
-
-ifeq ($(firstword $(subst /, ,$(PLATFORM))), windows)
-BIN = $(DIST)/$(BIN_NAME).exe
-endif
-
+.PHONY: build
 build:
 	go build -o bin/damon ./cmd/damon
 
+.PHONY: run
 run:
 	./bin/damon
 
+.PHONY: install-osx
 install-osx:
 	cp ./bin/damon /usr/local/bin/damon
 
+.PHONY: test
 test:
 	go test ./...
 
-
 pkg/%/damon: GO_OUT ?= $@
-pkg/%/damon: ## Build Nomad Autoscaler for GOOS_GOARCH, e.g. pkg/linux_amd64/nomad
+pkg/windows_%/damon: GO_OUT = $@.exe
+pkg/%/damon: ## Build Daemon for GOOS_GOARCH, e.g. pkg/linux_amd64/damon
 	@echo "==> Building $@ with tags $(GO_TAGS)..."
 	@CGO_ENABLED=0 \
 		GOOS=$(firstword $(subst _, ,$*)) \
 		GOARCH=$(lastword $(subst _, ,$*)) \
-		go build -trimpath -ldflags $(GO_LDFLAGS) -tags "$(GO_TAGS)" -o $(GO_OUT)
+		go build -trimpath -ldflags $(GO_LDFLAGS) -tags "$(GO_TAGS)" -o $(GO_OUT) ./cmd/damon
 
-pkg/windows_%/nomad-autoscaler: GO_OUT = $@.exe
+.PRECIOUS: pkg/%/damon
+pkg/%.zip: pkg/%/damon ## Build and zip Damon for GOOS_GOARCH, e.g. pkg/linux_amd64.zip
+	@echo "==> Packaging for $@..."
+	zip -j $@ $(dir $<)*
 
-# Common Dev make target.
-# Includes GO_LDFLAGS for convenience.
-# Deploys dev build to GOPATH.
 .PHONY: dev
-dev: GOPATH=$(shell go env GOPATH)
-dev:
+dev: ## Build for the current development version
 	@echo "==> Building damon..."
 	@CGO_ENABLED=0 go build -ldflags $(GO_LDFLAGS) -o ./bin/damon ./cmd/damon
 	@rm -f $(GOPATH)/bin/damon
 	@cp ./bin/damon $(GOPATH)/bin/damon
 	@echo "==> Done"
 
-# Supports CRT expected directory structure
-dist:
-	mkdir -p $(DIST)
-	echo '*' > dist/.gitignore
-
-# Supports CRT builds
-.PHONY: bin
-bin: dist
-	GOARCH=$(ARCH) GOOS=$(OS) go build -o $(BIN) ./cmd/damon
-
-.PHONY: binpath
-binpath:
-	@echo -n "$(BIN)"
-
-# Support CRT version inference
 .PHONY: version
 version:
-	@echo $(VERSION)
-
-# Supports Docker image builds.
-export DOCKER_BUILDKIT=1
-BUILD_ARGS = BIN_NAME=$(BIN_NAME) PRODUCT_VERSION=$(VERSION) PRODUCT_REVISION=$(REVISION)
-TAG        = $(PRODUCT_NAME)/$(TARGET):$(VERSION)
-BA_FLAGS   = $(addprefix --build-arg=,$(BUILD_ARGS))
-FLAGS      = --target $(TARGET) --platform $(PLATFORM) --tag $(TAG) $(BA_FLAGS)
-
-# Set OS to linux for all docker/* targets.
-docker/%: OS = linux
-
-# DOCKER_TARGET is a macro that generates the build and run make targets
-# for a given Dockerfile target.
-# Args: 1) Dockerfile target name (required).
-#       2) Build prerequisites (optional).
-define DOCKER_TARGET
-.PHONY: docker/$(1)
-docker/$(1): TARGET=$(1)
-docker/$(1): $(2)
-	docker build $$(FLAGS) .
-	@echo 'Image built; run "docker run --rm $$(TAG)" to try it out.'
-
-.PHONY: docker/$(1)/run
-docker/$(1)/run: TARGET=$(1)
-docker/$(1)/run: docker/$(1)
-	docker run --rm $$(TAG)
-endef
-
-# Create docker/<target>[/run] targets.
-$(eval $(call DOCKER_TARGET,dev,))
-$(eval $(call DOCKER_TARGET,release,bin))
-
-.PHONY: docker
-docker: docker/dev
+ifneq (,$(wildcard version/version_ent.go))
+	@$(CURDIR)/scripts/version.sh version/version.go version/version_ent.go
+else
+	@$(CURDIR)/scripts/version.sh version/version.go version/version.go
+endif

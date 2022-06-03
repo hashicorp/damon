@@ -1,0 +1,22 @@
+name: Go Tests
+
+on:
+  push:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Determine Go version
+        id: get-go-version
+        run: |
+          echo "Building with Go $(cat .go-version)"
+          echo "::set-output name=go-version::$(cat .go-version)"
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ steps.get-go-version.outputs.go-version }}
+      - name: Run tests
+        run: |
+          make test

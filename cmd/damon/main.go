@@ -7,23 +7,19 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/jessevdk/go-flags"
-	"github.com/rivo/tview"
-
 	"github.com/hcjulz/damon/nomad"
 	"github.com/hcjulz/damon/state"
 	"github.com/hcjulz/damon/styles"
+	"github.com/hcjulz/damon/version"
 	"github.com/hcjulz/damon/view"
 	"github.com/hcjulz/damon/watcher"
+	"github.com/jessevdk/go-flags"
+	"github.com/rivo/tview"
 
 	"github.com/hcjulz/damon/component"
 )
 
 var refreshIntervalDefault = time.Second * 2
-
-const (
-	version = "v0.0.0"
-)
 
 type options struct {
 	Version bool `short:"v" long:"version" description:"Show Damon version"`
@@ -40,7 +36,7 @@ func main() {
 	}
 
 	if opts.Version {
-		fmt.Println("Damon", version)
+		fmt.Println("Damon", version.GetHumanVersion())
 		os.Exit(0)
 	}
 
@@ -99,7 +95,7 @@ func main() {
 	go watcher.Watch()
 
 	view := view.New(components, watcher, nomadClient, state)
-	view.Init(version)
+	view.Init(version.GetHumanVersion())
 
 	err = view.Layout.Container.Run()
 	if err != nil {

@@ -3,6 +3,7 @@
 vendor/*
 bin
 bin/*
+pkg/
 
 # assets download path when using bob CLI
 .bob/*

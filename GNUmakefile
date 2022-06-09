@@ -4,7 +4,7 @@ default: help
 GIT_COMMIT := $(shell git rev-parse --short HEAD)
 GIT_DIRTY := $(if $(shell git status --porcelain),+CHANGES)
 
-GO_LDFLAGS := "-X github.com/hcjulz/damon/version.GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)"
+GO_LDFLAGS := "$(GO_LDFLAGS) -X github.com/hcjulz/damon/version.GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)"
 
 HELP_FORMAT="    \033[36m%-25s\033[0m %s\n"
 .PHONY: help

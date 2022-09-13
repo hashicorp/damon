@@ -79,6 +79,7 @@ type TaskGroupStatus struct {
 type Alloc struct {
 	ID            string
 	Name          string
+	Namespace     string
 	TaskGroup     string
 	Tasks         []AllocTask
 	TaskNames     []string

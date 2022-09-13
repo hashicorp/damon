@@ -29,6 +29,7 @@ func TestAllocation_Happy(t *testing.T) {
 				TaskGroup:     "tokio",
 				JobID:         "japan",
 				JobType:       "manga",
+				Namespace:     "namespace",
 				NodeID:        "node",
 				NodeName:      "node",
 				DesiredStatus: "run",
@@ -38,6 +39,7 @@ func TestAllocation_Happy(t *testing.T) {
 				TaskGroup:     "tokio",
 				JobID:         "japan",
 				JobType:       "manga",
+				Namespace:     "namespace",
 				NodeID:        "node",
 				NodeName:      "node",
 				DesiredStatus: "stop",
@@ -77,8 +79,8 @@ func TestAllocation_Happy(t *testing.T) {
 
 		row1, index1, c1 := fakeTable.RenderRowArgsForCall(0)
 		row2, index2, c2 := fakeTable.RenderRowArgsForCall(1)
-		expectedRow1 := []string{"ichi", "tokio", "japan", "manga", "node", "node", "run"}
-		expectedRow2 := []string{"ni", "tokio", "japan", "manga", "node", "node", "stop"}
+		expectedRow1 := []string{"ichi", "tokio", "japan", "manga", "namespace", "node", "node", "run"}
+		expectedRow2 := []string{"ni", "tokio", "japan", "manga", "namespace", "node", "node", "stop"}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)
@@ -105,6 +107,7 @@ func TestAllocation_Happy(t *testing.T) {
 				TaskGroup:     "tokio",
 				JobID:         "japan",
 				JobType:       "manga",
+				Namespace:     "namespace",
 				NodeID:        "node",
 				NodeName:      "node",
 				DesiredStatus: "run",

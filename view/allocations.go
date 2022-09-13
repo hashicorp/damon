@@ -59,6 +59,7 @@ func (v *View) Allocations(jobID string) {
 
 func (v *View) filterAllocs(jobID string) []*models.Alloc {
 	data := v.filterAllocsForJob(jobID)
+	data = v.namespaceFilterAllocs(data)
 	filter := v.state.Filter.Allocations
 	if filter != "" {
 		rx, _ := regexp.Compile(filter)
@@ -88,6 +89,18 @@ func (v *View) filterAllocsForJob(jobID string) []*models.Alloc {
 		switch true {
 		case rx.MatchString(job.JobID):
 			result = append(result, job)
+		}
+	}
+	return result
+}
+
+func (v *View) namespaceFilterAllocs(allocs []*models.Alloc) []*models.Alloc {
+	rx, _ := regexp.Compile(v.state.SelectedNamespace)
+	result := []*models.Alloc{}
+	for _, a := range allocs {
+		switch true {
+		case rx.MatchString(a.Namespace):
+			result = append(result, a)
 		}
 	}
 	return result

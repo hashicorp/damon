@@ -26,6 +26,7 @@ func TestJobAllocs(t *testing.T) {
 			{
 				ID:            "id-one",
 				TaskGroup:     "the-group",
+				Namespace:     "namespace",
 				JobID:         "the-job",
 				JobType:       "the-type",
 				NodeID:        "node-id",
@@ -50,6 +51,7 @@ func TestJobAllocs(t *testing.T) {
 			{
 				ID:            "id-two",
 				TaskGroup:     "the-group",
+				Namespace:     "namespace",
 				JobID:         "the-job",
 				JobType:       "the-type",
 				NodeID:        "node-id",
@@ -84,6 +86,7 @@ func TestJobAllocs(t *testing.T) {
 			{
 				ID:            "id-one",
 				TaskGroup:     "the-group",
+				Namespace:     "namespace",
 				JobID:         "the-job",
 				JobType:       "the-type",
 				NodeID:        "node-id",
@@ -110,6 +113,7 @@ func TestJobAllocs(t *testing.T) {
 			{
 				ID:            "id-two",
 				TaskGroup:     "the-group",
+				Namespace:     "namespace",
 				JobID:         "the-job",
 				JobType:       "the-type",
 				NodeID:        "node-id",

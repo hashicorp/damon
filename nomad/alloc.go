@@ -50,6 +50,7 @@ func toAllocs(list []*api.AllocationListStub) []*models.Alloc {
 	for _, el := range list {
 		alloc := &models.Alloc{
 			ID:            el.ID,
+			Namespace:     el.Namespace,
 			TaskGroup:     el.TaskGroup,
 			JobID:         el.JobID,
 			JobType:       el.JobType,

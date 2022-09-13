@@ -36,6 +36,7 @@ type Nomad interface {
 type Watcher struct {
 	state      *state.State
 	subscriber *subscriber
+	logResumer *logResumer
 	handlers   map[models.Handler]func(msg string, args ...interface{})
 	nomad      Nomad
 
@@ -43,6 +44,11 @@ type Watcher struct {
 	activities  Activities
 
 	interval time.Duration
+}
+
+type logResumer struct {
+	allocID, taskName, source string
+	notify                    func()
 }
 
 type subscriber struct {
@@ -80,6 +86,7 @@ func (w *Watcher) Subscribe(notify func(), topics ...api.Topic) {
 // Unsubscribe removes the current subscriber.
 func (w *Watcher) Unsubscribe() {
 	w.subscriber = nil
+	w.activities.DeactivateAll()
 }
 
 // SubscribeHandler subscribes a handler to the watcher. This can be an for example an error

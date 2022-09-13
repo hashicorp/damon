@@ -40,6 +40,7 @@ func NewNamespaceTable() *NamespaceTable {
 }
 
 func (n *NamespaceTable) Bind(slot *tview.Flex) {
+	slot.SetTitle("Namespaces")
 	n.slot = slot
 }
 

@@ -58,7 +58,8 @@ func main() {
 	taskEvents := component.NewTaskEventsTable()
 	logs := component.NewLogger()
 	jumpToJob := component.NewJumpToJob()
-	logSearch := component.NewSearchField()
+	logSearch := component.NewSearchField("/")
+	logHighlight := component.NewSearchField("highlight")
 	errorComp := component.NewError()
 	info := component.NewInfo()
 	failure := component.NewInfo()
@@ -83,6 +84,7 @@ func main() {
 		TaskGroupTable:  taskGroups,
 		TaskEventsTable: taskEvents,
 		LogStream:       logs,
+		LogHighlight:    logHighlight,
 		JumpToJob:       jumpToJob,
 		Error:           errorComp,
 		Info:            info,

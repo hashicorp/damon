@@ -8,6 +8,7 @@ import (
 )
 
 func (v *View) TaskGroups(jobID string) {
+	v.Layout.Body.SetTitle(titleTaskGroups)
 	v.state.Elements.TableMain = v.components.TaskGroupTable.Table.Primitive().(*tview.Table)
 
 	v.components.Commands.Update(component.NoViewCommands)

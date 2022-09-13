@@ -11,6 +11,9 @@ import (
 
 func (v *View) Namespaces() {
 	v.viewSwitch()
+
+	v.Layout.Body.SetTitle(titleNamespaces)
+
 	v.state.Elements.TableMain = v.components.NamespaceTable.Table.Primitive().(*tview.Table)
 	v.components.Commands.Update(component.NoViewCommands)
 	v.Layout.Container.SetInputCapture(v.InputNamespaces)

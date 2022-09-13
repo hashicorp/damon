@@ -79,8 +79,6 @@ func (v *View) inputAllocs(event *tcell.EventKey) *tcell.EventKey {
 			return nil
 		}
 
-		v.components.LogSearch.InputField.SetText("")
-
 		v.Logs(allocs.TaskNames, allocID, "stderr")
 
 		return nil
@@ -112,6 +110,25 @@ func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 				} else {
 					v.Layout.Container.SetFocus(v.components.LogSearch.InputField.Primitive())
 				}
+
+			}
+		case 'h':
+			if !v.Layout.Footer.HasFocus() {
+				if !v.state.Toggle.LogHighlight {
+					v.state.Toggle.LogHighlight = true
+					v.LogHighlight()
+					return nil
+				} else {
+					v.Layout.Container.SetFocus(v.components.LogHighlight.InputField.Primitive())
+				}
+			}
+		case 's':
+			if !v.Layout.Footer.HasFocus() {
+				v.Watcher.Unsubscribe()
+			}
+		case 'r':
+			if !v.Layout.Footer.HasFocus() {
+				v.Watcher.ResumeLogs()
 
 			}
 		}

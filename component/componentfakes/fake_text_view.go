@@ -9,19 +9,37 @@ import (
 )
 
 type FakeTextView struct {
-	ClearStub        func()
+	ClearStub        func() *tview.TextView
 	clearMutex       sync.RWMutex
 	clearArgsForCall []struct {
 	}
-	GetTextStub        func() string
+	clearReturns struct {
+		result1 *tview.TextView
+	}
+	clearReturnsOnCall map[int]struct {
+		result1 *tview.TextView
+	}
+	GetTextStub        func(bool) string
 	getTextMutex       sync.RWMutex
 	getTextArgsForCall []struct {
+		arg1 bool
 	}
 	getTextReturns struct {
 		result1 string
 	}
 	getTextReturnsOnCall map[int]struct {
 		result1 string
+	}
+	HighlightStub        func(...string) *tview.TextView
+	highlightMutex       sync.RWMutex
+	highlightArgsForCall []struct {
+		arg1 []string
+	}
+	highlightReturns struct {
+		result1 *tview.TextView
+	}
+	highlightReturnsOnCall map[int]struct {
+		result1 *tview.TextView
 	}
 	ModifyPrimitiveStub        func(func(t *tview.TextView))
 	modifyPrimitiveMutex       sync.RWMutex
@@ -38,25 +56,50 @@ type FakeTextView struct {
 	primitiveReturnsOnCall map[int]struct {
 		result1 tview.Primitive
 	}
-	SetTextStub        func(string)
+	SetTextStub        func(string) *tview.TextView
 	setTextMutex       sync.RWMutex
 	setTextArgsForCall []struct {
 		arg1 string
+	}
+	setTextReturns struct {
+		result1 *tview.TextView
+	}
+	setTextReturnsOnCall map[int]struct {
+		result1 *tview.TextView
+	}
+	WriteStub        func([]byte) (int, error)
+	writeMutex       sync.RWMutex
+	writeArgsForCall []struct {
+		arg1 []byte
+	}
+	writeReturns struct {
+		result1 int
+		result2 error
+	}
+	writeReturnsOnCall map[int]struct {
+		result1 int
+		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeTextView) Clear() {
+func (fake *FakeTextView) Clear() *tview.TextView {
 	fake.clearMutex.Lock()
+	ret, specificReturn := fake.clearReturnsOnCall[len(fake.clearArgsForCall)]
 	fake.clearArgsForCall = append(fake.clearArgsForCall, struct {
 	}{})
 	stub := fake.ClearStub
+	fakeReturns := fake.clearReturns
 	fake.recordInvocation("Clear", []interface{}{})
 	fake.clearMutex.Unlock()
 	if stub != nil {
-		fake.ClearStub()
+		return stub()
 	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
 }
 
 func (fake *FakeTextView) ClearCallCount() int {
@@ -65,23 +108,47 @@ func (fake *FakeTextView) ClearCallCount() int {
 	return len(fake.clearArgsForCall)
 }
 
-func (fake *FakeTextView) ClearCalls(stub func()) {
+func (fake *FakeTextView) ClearCalls(stub func() *tview.TextView) {
 	fake.clearMutex.Lock()
 	defer fake.clearMutex.Unlock()
 	fake.ClearStub = stub
 }
 
-func (fake *FakeTextView) GetText() string {
+func (fake *FakeTextView) ClearReturns(result1 *tview.TextView) {
+	fake.clearMutex.Lock()
+	defer fake.clearMutex.Unlock()
+	fake.ClearStub = nil
+	fake.clearReturns = struct {
+		result1 *tview.TextView
+	}{result1}
+}
+
+func (fake *FakeTextView) ClearReturnsOnCall(i int, result1 *tview.TextView) {
+	fake.clearMutex.Lock()
+	defer fake.clearMutex.Unlock()
+	fake.ClearStub = nil
+	if fake.clearReturnsOnCall == nil {
+		fake.clearReturnsOnCall = make(map[int]struct {
+			result1 *tview.TextView
+		})
+	}
+	fake.clearReturnsOnCall[i] = struct {
+		result1 *tview.TextView
+	}{result1}
+}
+
+func (fake *FakeTextView) GetText(arg1 bool) string {
 	fake.getTextMutex.Lock()
 	ret, specificReturn := fake.getTextReturnsOnCall[len(fake.getTextArgsForCall)]
 	fake.getTextArgsForCall = append(fake.getTextArgsForCall, struct {
-	}{})
+		arg1 bool
+	}{arg1})
 	stub := fake.GetTextStub
 	fakeReturns := fake.getTextReturns
-	fake.recordInvocation("GetText", []interface{}{})
+	fake.recordInvocation("GetText", []interface{}{arg1})
 	fake.getTextMutex.Unlock()
 	if stub != nil {
-		return stub()
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
@@ -95,10 +162,17 @@ func (fake *FakeTextView) GetTextCallCount() int {
 	return len(fake.getTextArgsForCall)
 }
 
-func (fake *FakeTextView) GetTextCalls(stub func() string) {
+func (fake *FakeTextView) GetTextCalls(stub func(bool) string) {
 	fake.getTextMutex.Lock()
 	defer fake.getTextMutex.Unlock()
 	fake.GetTextStub = stub
+}
+
+func (fake *FakeTextView) GetTextArgsForCall(i int) bool {
+	fake.getTextMutex.RLock()
+	defer fake.getTextMutex.RUnlock()
+	argsForCall := fake.getTextArgsForCall[i]
+	return argsForCall.arg1
 }
 
 func (fake *FakeTextView) GetTextReturns(result1 string) {
@@ -121,6 +195,67 @@ func (fake *FakeTextView) GetTextReturnsOnCall(i int, result1 string) {
 	}
 	fake.getTextReturnsOnCall[i] = struct {
 		result1 string
+	}{result1}
+}
+
+func (fake *FakeTextView) Highlight(arg1 ...string) *tview.TextView {
+	fake.highlightMutex.Lock()
+	ret, specificReturn := fake.highlightReturnsOnCall[len(fake.highlightArgsForCall)]
+	fake.highlightArgsForCall = append(fake.highlightArgsForCall, struct {
+		arg1 []string
+	}{arg1})
+	stub := fake.HighlightStub
+	fakeReturns := fake.highlightReturns
+	fake.recordInvocation("Highlight", []interface{}{arg1})
+	fake.highlightMutex.Unlock()
+	if stub != nil {
+		return stub(arg1...)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeTextView) HighlightCallCount() int {
+	fake.highlightMutex.RLock()
+	defer fake.highlightMutex.RUnlock()
+	return len(fake.highlightArgsForCall)
+}
+
+func (fake *FakeTextView) HighlightCalls(stub func(...string) *tview.TextView) {
+	fake.highlightMutex.Lock()
+	defer fake.highlightMutex.Unlock()
+	fake.HighlightStub = stub
+}
+
+func (fake *FakeTextView) HighlightArgsForCall(i int) []string {
+	fake.highlightMutex.RLock()
+	defer fake.highlightMutex.RUnlock()
+	argsForCall := fake.highlightArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeTextView) HighlightReturns(result1 *tview.TextView) {
+	fake.highlightMutex.Lock()
+	defer fake.highlightMutex.Unlock()
+	fake.HighlightStub = nil
+	fake.highlightReturns = struct {
+		result1 *tview.TextView
+	}{result1}
+}
+
+func (fake *FakeTextView) HighlightReturnsOnCall(i int, result1 *tview.TextView) {
+	fake.highlightMutex.Lock()
+	defer fake.highlightMutex.Unlock()
+	fake.HighlightStub = nil
+	if fake.highlightReturnsOnCall == nil {
+		fake.highlightReturnsOnCall = make(map[int]struct {
+			result1 *tview.TextView
+		})
+	}
+	fake.highlightReturnsOnCall[i] = struct {
+		result1 *tview.TextView
 	}{result1}
 }
 
@@ -209,17 +344,23 @@ func (fake *FakeTextView) PrimitiveReturnsOnCall(i int, result1 tview.Primitive)
 	}{result1}
 }
 
-func (fake *FakeTextView) SetText(arg1 string) {
+func (fake *FakeTextView) SetText(arg1 string) *tview.TextView {
 	fake.setTextMutex.Lock()
+	ret, specificReturn := fake.setTextReturnsOnCall[len(fake.setTextArgsForCall)]
 	fake.setTextArgsForCall = append(fake.setTextArgsForCall, struct {
 		arg1 string
 	}{arg1})
 	stub := fake.SetTextStub
+	fakeReturns := fake.setTextReturns
 	fake.recordInvocation("SetText", []interface{}{arg1})
 	fake.setTextMutex.Unlock()
 	if stub != nil {
-		fake.SetTextStub(arg1)
+		return stub(arg1)
 	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
 }
 
 func (fake *FakeTextView) SetTextCallCount() int {
@@ -228,7 +369,7 @@ func (fake *FakeTextView) SetTextCallCount() int {
 	return len(fake.setTextArgsForCall)
 }
 
-func (fake *FakeTextView) SetTextCalls(stub func(string)) {
+func (fake *FakeTextView) SetTextCalls(stub func(string) *tview.TextView) {
 	fake.setTextMutex.Lock()
 	defer fake.setTextMutex.Unlock()
 	fake.SetTextStub = stub
@@ -241,6 +382,98 @@ func (fake *FakeTextView) SetTextArgsForCall(i int) string {
 	return argsForCall.arg1
 }
 
+func (fake *FakeTextView) SetTextReturns(result1 *tview.TextView) {
+	fake.setTextMutex.Lock()
+	defer fake.setTextMutex.Unlock()
+	fake.SetTextStub = nil
+	fake.setTextReturns = struct {
+		result1 *tview.TextView
+	}{result1}
+}
+
+func (fake *FakeTextView) SetTextReturnsOnCall(i int, result1 *tview.TextView) {
+	fake.setTextMutex.Lock()
+	defer fake.setTextMutex.Unlock()
+	fake.SetTextStub = nil
+	if fake.setTextReturnsOnCall == nil {
+		fake.setTextReturnsOnCall = make(map[int]struct {
+			result1 *tview.TextView
+		})
+	}
+	fake.setTextReturnsOnCall[i] = struct {
+		result1 *tview.TextView
+	}{result1}
+}
+
+func (fake *FakeTextView) Write(arg1 []byte) (int, error) {
+	var arg1Copy []byte
+	if arg1 != nil {
+		arg1Copy = make([]byte, len(arg1))
+		copy(arg1Copy, arg1)
+	}
+	fake.writeMutex.Lock()
+	ret, specificReturn := fake.writeReturnsOnCall[len(fake.writeArgsForCall)]
+	fake.writeArgsForCall = append(fake.writeArgsForCall, struct {
+		arg1 []byte
+	}{arg1Copy})
+	stub := fake.WriteStub
+	fakeReturns := fake.writeReturns
+	fake.recordInvocation("Write", []interface{}{arg1Copy})
+	fake.writeMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeTextView) WriteCallCount() int {
+	fake.writeMutex.RLock()
+	defer fake.writeMutex.RUnlock()
+	return len(fake.writeArgsForCall)
+}
+
+func (fake *FakeTextView) WriteCalls(stub func([]byte) (int, error)) {
+	fake.writeMutex.Lock()
+	defer fake.writeMutex.Unlock()
+	fake.WriteStub = stub
+}
+
+func (fake *FakeTextView) WriteArgsForCall(i int) []byte {
+	fake.writeMutex.RLock()
+	defer fake.writeMutex.RUnlock()
+	argsForCall := fake.writeArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeTextView) WriteReturns(result1 int, result2 error) {
+	fake.writeMutex.Lock()
+	defer fake.writeMutex.Unlock()
+	fake.WriteStub = nil
+	fake.writeReturns = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeTextView) WriteReturnsOnCall(i int, result1 int, result2 error) {
+	fake.writeMutex.Lock()
+	defer fake.writeMutex.Unlock()
+	fake.WriteStub = nil
+	if fake.writeReturnsOnCall == nil {
+		fake.writeReturnsOnCall = make(map[int]struct {
+			result1 int
+			result2 error
+		})
+	}
+	fake.writeReturnsOnCall[i] = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeTextView) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -248,12 +481,16 @@ func (fake *FakeTextView) Invocations() map[string][][]interface{} {
 	defer fake.clearMutex.RUnlock()
 	fake.getTextMutex.RLock()
 	defer fake.getTextMutex.RUnlock()
+	fake.highlightMutex.RLock()
+	defer fake.highlightMutex.RUnlock()
 	fake.modifyPrimitiveMutex.RLock()
 	defer fake.modifyPrimitiveMutex.RUnlock()
 	fake.primitiveMutex.RLock()
 	defer fake.primitiveMutex.RUnlock()
 	fake.setTextMutex.RLock()
 	defer fake.setTextMutex.RUnlock()
+	fake.writeMutex.RLock()
+	defer fake.writeMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

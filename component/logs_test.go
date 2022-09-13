@@ -28,7 +28,7 @@ func TestLogs_Happy(t *testing.T) {
 		r.NoError(err)
 
 		text := textView.SetTextArgsForCall(0)
-		r.Equal(text, "logs")
+		r.Equal(string(text), "logs")
 	})
 
 	t.Run("When there is no data to render", func(t *testing.T) {

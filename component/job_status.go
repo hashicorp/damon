@@ -5,10 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hcjulz/damon/models"
-	primitive "github.com/hcjulz/damon/primitives"
 	"github.com/olekukonko/tablewriter"
 	"github.com/rivo/tview"
+
+	"github.com/hcjulz/damon/models"
+	primitive "github.com/hcjulz/damon/primitives"
 )
 
 const (

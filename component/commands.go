@@ -40,6 +40,9 @@ var (
 		fmt.Sprintf("\n%sLog Commands:", styles.HighlightSecondaryTag),
 		fmt.Sprintf("%s<Enter> | <ESC>%s to leave", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s</>%s apply filter", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<h>%s highlight", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<s>%s stop log stream", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<r>%s resume log stream", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 
 	DeploymentCommands = []string{}

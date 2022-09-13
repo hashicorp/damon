@@ -1,6 +1,8 @@
 package view
 
 import (
+	"sync"
+
 	"github.com/hashicorp/nomad/api"
 
 	"github.com/hcjulz/damon/component"
@@ -9,7 +11,18 @@ import (
 	"github.com/hcjulz/damon/state"
 )
 
-const historySize = 10
+const (
+	historySize = 10
+
+	titleTaskGroups  = "taskgroups"
+	titleJobs        = "jobs"
+	titleJobStatus   = "jobsstatus"
+	titleDeployments = "deployments"
+	titleNamespaces  = "namespaces"
+	titleAllocations = "allocations"
+	titleTaskEvents  = "taskevents"
+	titleLogs        = "logs"
+)
 
 // Client ...
 //go:generate counterfeiter . Client
@@ -30,6 +43,8 @@ type Watcher interface {
 	SubscribeToTaskGroups(jobID string, notify func()) error
 	SubscribeToJobStatus(jobID string, notify func()) error
 	SubscribeToLogs(allocID, taskName, source string, notify func())
+
+	ResumeLogs()
 }
 
 type View struct {
@@ -42,6 +57,7 @@ type View struct {
 	state   *state.State
 
 	components *Components
+	mutex      sync.Mutex
 
 	draw chan struct{}
 }
@@ -65,12 +81,13 @@ type Components struct {
 	Failure         *component.Info
 	LogStream       *component.Logger
 	LogSearch       *component.SearchField
+	LogHighlight    *component.SearchField
 	Search          *component.SearchField
 	Confirm         *component.GenericModal
 }
 
 func New(components *Components, watcher Watcher, client Client, state *state.State) *View {
-	components.Search = component.NewSearchField()
+	components.Search = component.NewSearchField("")
 
 	return &View{
 
@@ -105,6 +122,13 @@ func (v *View) LogSearch() {
 	v.Layout.MainPage.ResizeItem(v.Layout.Footer, 0, 1)
 	search.Render()
 	v.Layout.Container.SetFocus(search.InputField.Primitive())
+}
+
+func (v *View) LogHighlight() {
+	highlight := v.components.LogHighlight
+	v.Layout.MainPage.ResizeItem(v.Layout.Footer, 0, 1)
+	highlight.Render()
+	v.Layout.Container.SetFocus(highlight.InputField.Primitive())
 }
 
 func (v *View) Search() {

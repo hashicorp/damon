@@ -85,6 +85,7 @@ On every table or text view, you can use:
 - Show TaskGroups for a Job: `<t>` (on the selected job)
 - Show information for a Job: `<i>` (on the selected job)
 - Filter Job: `</>` (on the selected job)
+- Show Job Info: `i` (on the selected job)
 
 ### Allocation View Commands
 
@@ -95,4 +96,8 @@ On every table or text view, you can use:
 ### Log View
 
 When Damon displays logs, you can navigate through the logs using `j`, `k`, `G`, and `g`.
-To filter logs you can hit `/` which will open a input field to enter the filter string.
+
+- To filter logs you can hit `/` which will open an input field to enter the filter string.
+- To highligh logs you can hit `h`. This will also open an input field to enter the highlighting string.
+- Hit `s` to stop a log stream.
+- Hit `r` to resume a log stream.

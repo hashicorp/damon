@@ -1,6 +1,14 @@
 # Damon - A terminal Dashboard for HashiCorp Nomad
 
-Damon is a terminal user interface (TUI) for Nomad. It provides functionality to observe and interact with Nomad resources such as Jobs, Deployments, or Allocations.
+Damon is a terminal user interface (TUI) for Nomad. It provides functionality to observe and interact with Nomad resources such as Jobs, Deployments, or Allocations. Interactions include:
+
+- View Jobs and Job allocations
+- View Deployments
+- View Namespaces
+- Show Task events
+- Show Job status/information (equally to `$ nomad status <job>`)
+- Show Logs in an active log stream (including filtering + highlighting).
+- and more...
 
 **Additional Notes**
 

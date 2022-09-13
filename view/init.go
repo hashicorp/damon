@@ -46,15 +46,33 @@ func (v *View) Init(version string) {
 	v.components.LogSearch.Bind(v.Layout.Footer)
 	v.components.LogSearch.Props.ChangedFunc = func(text string) {
 		v.state.Filter.Logs = text
-		v.components.LogStream.Props.Data = filterLogs(v.state.Logs, text)
-		v.components.LogStream.Render()
-		v.Draw()
+		v.components.LogStream.Props.Filter = text
 	}
+
 	v.components.LogSearch.Props.DoneFunc = func(key tcell.Key) {
 		v.Layout.MainPage.ResizeItem(v.Layout.Footer, 0, 0)
 		v.Layout.Footer.RemoveItem(v.components.LogSearch.InputField.Primitive())
 		v.Layout.Container.SetFocus(v.components.LogStream.TextView.Primitive())
 		v.state.Toggle.LogSearch = false
+
+		v.components.LogStream.Render()
+		v.Draw()
+	}
+
+	// LogHighlightfield
+	v.components.LogHighlight.Bind(v.Layout.Footer)
+	v.components.LogHighlight.Props.ChangedFunc = func(text string) {
+		v.components.LogStream.Props.Highlight = text
+	}
+
+	v.components.LogHighlight.Props.DoneFunc = func(key tcell.Key) {
+		v.Layout.MainPage.ResizeItem(v.Layout.Footer, 0, 0)
+		v.Layout.Footer.RemoveItem(v.components.LogHighlight.InputField.Primitive())
+		v.Layout.Container.SetFocus(v.components.LogStream.TextView.Primitive())
+		v.state.Toggle.LogHighlight = false
+
+		v.components.LogStream.Render()
+		v.Draw()
 	}
 
 	// SearchField
@@ -113,6 +131,7 @@ func (v *View) Init(version string) {
 	// Logs
 	v.components.LogStream.Bind(v.Layout.Body)
 	v.components.LogStream.Props.HandleNoResources = v.handleNoResources
+	v.components.LogStream.Props.App = v.Layout.Container
 
 	// Logo
 	v.components.Logo.Bind(v.Layout.Header.SlotLogo)

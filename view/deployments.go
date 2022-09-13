@@ -12,6 +12,7 @@ import (
 
 func (v *View) Deployments() {
 	v.viewSwitch()
+	v.Layout.Body.SetTitle(titleDeployments)
 
 	v.components.Commands.Update(component.DeploymentCommands)
 

@@ -1,12 +1,14 @@
 package component
 
 import (
+	"fmt"
+
 	"github.com/rivo/tview"
 
 	primitive "github.com/hcjulz/damon/primitives"
 )
 
-const searchPlaceholder = "search (hit enter or esc to leave)"
+const searchPlaceholder = "(hit enter or esc to leave)"
 
 type SearchField struct {
 	InputField InputField
@@ -19,10 +21,11 @@ type SearchFieldProps struct {
 	ChangedFunc func(text string)
 }
 
-func NewSearchField() *SearchField {
+func NewSearchField(label string) *SearchField {
 	sf := &SearchField{}
 	sf.Props = &SearchFieldProps{}
-	sf.InputField = primitive.NewInputField("/ ", searchPlaceholder)
+	label = fmt.Sprintf("%s ", label)
+	sf.InputField = primitive.NewInputField(label, searchPlaceholder)
 	return sf
 }
 

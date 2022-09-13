@@ -5,6 +5,7 @@ import (
 )
 
 func (v *View) JobStatus(jobID string) {
+	v.Layout.Body.SetTitle(titleJobStatus)
 	v.Layout.Body.Clear()
 
 	v.Layout.Container.SetInputCapture(v.InputMainCommands)

@@ -82,9 +82,11 @@ type Table interface {
 //go:generate counterfeiter . TextView
 type TextView interface {
 	Primitive
-	GetText() string
-	SetText(text string)
-	Clear()
+	GetText(bool) string
+	SetText(text string) *tview.TextView
+	Write(data []byte) (int, error)
+	Highlight(regionIDs ...string) *tview.TextView
+	Clear() *tview.TextView
 	ModifyPrimitive(f func(t *tview.TextView))
 }
 

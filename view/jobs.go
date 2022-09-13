@@ -13,6 +13,7 @@ import (
 
 func (v *View) Jobs() {
 	v.viewSwitch()
+	v.Layout.Body.SetTitle(titleJobs)
 
 	v.Layout.Container.SetInputCapture(v.InputJobs)
 	v.components.Commands.Update(component.JobCommands)

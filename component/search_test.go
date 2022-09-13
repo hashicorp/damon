@@ -16,7 +16,7 @@ func TestSearch_Happy(t *testing.T) {
 	r := require.New(t)
 
 	input := &componentfakes.FakeInputField{}
-	search := component.NewSearchField()
+	search := component.NewSearchField("test")
 	search.InputField = input
 
 	var changedCalled bool
@@ -48,7 +48,7 @@ func TestSearch_Sad(t *testing.T) {
 
 	t.Run("When the component isn't bound", func(t *testing.T) {
 		input := &componentfakes.FakeInputField{}
-		search := component.NewSearchField()
+		search := component.NewSearchField("test")
 		search.InputField = input
 		search.Props.ChangedFunc = func(text string) {}
 		search.Props.DoneFunc = func(key tcell.Key) {}
@@ -65,7 +65,7 @@ func TestSearch_Sad(t *testing.T) {
 
 	t.Run("When DoneFunc is not set", func(t *testing.T) {
 		input := &componentfakes.FakeInputField{}
-		search := component.NewSearchField()
+		search := component.NewSearchField("test")
 		search.InputField = input
 		search.Props.ChangedFunc = func(text string) {}
 		search.Bind(tview.NewFlex())
@@ -82,7 +82,7 @@ func TestSearch_Sad(t *testing.T) {
 
 	t.Run("When ChangedFunc is not set", func(t *testing.T) {
 		input := &componentfakes.FakeInputField{}
-		search := component.NewSearchField()
+		search := component.NewSearchField("test")
 		search.InputField = input
 		search.Props.DoneFunc = func(key tcell.Key) {}
 		search.Bind(tview.NewFlex())

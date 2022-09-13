@@ -9,6 +9,7 @@ import (
 )
 
 func (v *View) TaskEvents(allocID string) {
+	v.Layout.Body.SetTitle(titleTaskEvents)
 	v.state.Elements.TableMain = v.components.TaskEventsTable.Table.Primitive().(*tview.Table)
 
 	v.components.Commands.Update(component.NoViewCommands)

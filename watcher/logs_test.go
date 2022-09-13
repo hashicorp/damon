@@ -83,7 +83,7 @@ func TestSubscribeToLogs_Happy(t *testing.T) {
 		return callCount == 3
 	}, time.Second*5, time.Microsecond*5)
 
-	r.Equal(state.Logs, []byte("a new log line\nanother log line\n"))
+	r.Equal(state.Logs, []byte("another log line\n"))
 }
 
 func TestSubscribeToLogs_Sad(t *testing.T) {

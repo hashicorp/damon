@@ -17,10 +17,10 @@ func TestTextView(t *testing.T) {
 	p := tv.Primitive().(*tview.TextView)
 
 	tv.SetText("test")
-	r.Equal(tv.GetText(), "test")
+	r.Equal(tv.GetText(true), "test")
 
 	tv.Clear()
-	r.Equal(tv.GetText(), "")
+	r.Equal(tv.GetText(true), "")
 
 	tv.ModifyPrimitive(func(v *tview.TextView) {
 		v.SetBackgroundColor(tcell.ColorWhite)

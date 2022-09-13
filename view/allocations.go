@@ -14,6 +14,8 @@ import (
 func (v *View) Allocations(jobID string) {
 	v.viewSwitch()
 
+	v.Layout.Body.SetTitle(titleAllocations)
+
 	v.components.Commands.Update(component.AllocCommands)
 	v.Layout.Container.SetInputCapture(v.InputAllocations)
 

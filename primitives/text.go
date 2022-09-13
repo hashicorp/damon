@@ -5,7 +5,7 @@ import (
 )
 
 type TextView struct {
-	primitive *tview.TextView
+	*tview.TextView
 }
 
 func NewTextView(align int) *TextView {
@@ -13,25 +13,13 @@ func NewTextView(align int) *TextView {
 		SetDynamicColors(true).
 		SetTextAlign(align)
 
-	return &TextView{primitive: t}
+	return &TextView{TextView: t}
 }
 
 func (t *TextView) Primitive() tview.Primitive {
-	return t.primitive
-}
-
-func (t *TextView) GetText() string {
-	return t.primitive.GetText(true)
-}
-
-func (t *TextView) SetText(text string) {
-	t.primitive.SetText(text)
-}
-
-func (t *TextView) Clear() {
-	t.primitive.Clear()
+	return t.TextView
 }
 
 func (t *TextView) ModifyPrimitive(f func(t *tview.TextView)) {
-	f(t.primitive)
+	f(t.TextView)
 }

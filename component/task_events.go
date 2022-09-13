@@ -46,6 +46,7 @@ func NewTaskEventsTable() *TaskEventsTable {
 }
 
 func (t *TaskEventsTable) Bind(slot *tview.Flex) {
+	slot.SetTitle("Events")
 	t.slot = slot
 }
 

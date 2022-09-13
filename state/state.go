@@ -43,9 +43,10 @@ type Filter struct {
 }
 
 type Toggle struct {
-	JumpToJob bool
-	Search    bool
-	LogSearch bool
+	JumpToJob    bool
+	Search       bool
+	LogSearch    bool
+	LogHighlight bool
 }
 
 type Elements struct {

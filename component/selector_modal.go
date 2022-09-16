@@ -29,8 +29,7 @@ func NewSelectorModal() *SelectorModal {
 	}
 
 	s.Modal.GetTable().SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		fn, ok := s.keyBindings[event.Key()]
-		if ok {
+		if fn, ok := s.keyBindings[event.Key()]; ok {
 			fn()
 		}
 

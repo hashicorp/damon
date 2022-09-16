@@ -23,17 +23,20 @@ var (
 	JobCommands = []string{
 		fmt.Sprintf("\n%sJob Commands:", styles.HighlightSecondaryTag),
 		fmt.Sprintf("%s<Enter>%s to display allocations", styles.HighlightPrimaryTag, styles.StandardColorTag),
-		fmt.Sprintf("%s<t>%s to display TaskGroups for a Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
-		fmt.Sprintf("%s<i>%s to display information for Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
-		fmt.Sprintf("%s<ctrl-s>%s start/stop a Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<t>%s to display TaskGroups for the selected Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<i>%s to display information for the selected Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<ctrl-s>%s start/stop the selected Job", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s</>%s apply filter", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 
 	AllocCommands = []string{
-		fmt.Sprintf("\n%sAlloc Commands:", styles.HighlightSecondaryTag),
-		fmt.Sprintf("%s<Enter>%s to display STDOUT logs", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		// fmt.Sprintf("\n%sAlloc Commands:", styles.HighlightSecondaryTag),
+	}
+
+	TaskCommands = []string{
+		fmt.Sprintf("%s<e>%s to display events for a Task", styles.HighlightPrimaryTag, styles.StandardColorTag),
 		fmt.Sprintf("%s<ctrl-e>%s to display STDERR logs", styles.HighlightPrimaryTag, styles.StandardColorTag),
-		fmt.Sprintf("%s<e>%s to display events for an allocation", styles.HighlightPrimaryTag, styles.StandardColorTag),
+		fmt.Sprintf("%s<Enter>%s to display STDOUT logs", styles.HighlightPrimaryTag, styles.StandardColorTag),
 	}
 
 	LogCommands = []string{

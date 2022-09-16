@@ -7,14 +7,15 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/jessevdk/go-flags"
+	"github.com/rivo/tview"
+
 	"github.com/hcjulz/damon/nomad"
 	"github.com/hcjulz/damon/state"
 	"github.com/hcjulz/damon/styles"
 	"github.com/hcjulz/damon/version"
 	"github.com/hcjulz/damon/view"
 	"github.com/hcjulz/damon/watcher"
-	"github.com/jessevdk/go-flags"
-	"github.com/rivo/tview"
 
 	"github.com/hcjulz/damon/component"
 )
@@ -56,6 +57,7 @@ func main() {
 	allocations := component.NewAllocationTable()
 	taskGroups := component.NewTaskGroupTable()
 	taskEvents := component.NewTaskEventsTable()
+	taskTable := component.NewTaskTable()
 	logs := component.NewLogger()
 	jumpToJob := component.NewJumpToJob()
 	logSearch := component.NewSearchField("/")
@@ -83,6 +85,7 @@ func main() {
 		AllocationTable: allocations,
 		TaskGroupTable:  taskGroups,
 		TaskEventsTable: taskEvents,
+		TaskTable:       taskTable,
 		LogStream:       logs,
 		LogHighlight:    logHighlight,
 		JumpToJob:       jumpToJob,

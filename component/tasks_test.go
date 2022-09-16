@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/hashicorp/nomad/api"
 	"github.com/rivo/tview"
 	"github.com/stretchr/testify/require"
 
@@ -14,42 +15,100 @@ import (
 	"github.com/hcjulz/damon/styles"
 )
 
-func TestAllocation_Happy(t *testing.T) {
+func TestTasks_Happy(t *testing.T) {
 	r := require.New(t)
 
 	t.Run("When there is data to render", func(t *testing.T) {
 		fakeTable := &componentfakes.FakeTable{}
-		at := component.NewAllocationTable()
+		at := component.NewTaskTable()
 
 		at.Table = fakeTable
-		at.Props.JobID = "japan"
-		at.Props.Data = []*models.Alloc{
+		at.Props.AllocationID = "japan"
+		at.Props.Data = []*models.Task{
 			{
-				ID:            "ichi",
-				TaskGroup:     "tokio",
-				JobID:         "japan",
-				JobType:       "manga",
-				Namespace:     "namespace",
-				HostAddresses: []string{"addr1"},
-				NodeID:        "node",
-				NodeName:      "node",
-				DesiredStatus: "run",
+				Name:     "task-1",
+				Driver:   "docker",
+				State:    "running",
+				CPU:      100,
+				MemoryMB: 10,
+				DiskMB:   1000,
+				Config: map[string]interface{}{
+					"image": "docker-image",
+				},
+				Env: map[string]string{
+					"env-key": "env-value",
+				},
+				Events: []*api.TaskEvent{
+					{
+						DisplayMessage: "msg",
+						Type:           "type",
+					},
+				},
 			},
 			{
-				ID:            "ni",
-				TaskGroup:     "tokio",
-				JobID:         "japan",
-				JobType:       "manga",
-				Namespace:     "namespace",
-				HostAddresses: []string{"addr2"},
-				NodeID:        "node",
-				NodeName:      "node",
-				DesiredStatus: "stop",
+				Name:     "task-2",
+				Driver:   "docker",
+				State:    "failed",
+				CPU:      100,
+				MemoryMB: 10,
+				DiskMB:   1000,
+				Config: map[string]interface{}{
+					"image": "docker-image",
+				},
+				Env: map[string]string{
+					"env-key": "env-value",
+				},
+				Events: []*api.TaskEvent{
+					{
+						DisplayMessage: "msg",
+						Type:           "type",
+					},
+				},
+			},
+			{
+				Name:     "task-3",
+				Driver:   "docker",
+				State:    "dead",
+				CPU:      100,
+				MemoryMB: 10,
+				DiskMB:   1000,
+				Config: map[string]interface{}{
+					"image": "docker-image",
+				},
+				Env: map[string]string{
+					"env-key": "env-value",
+				},
+				Events: []*api.TaskEvent{
+					{
+						DisplayMessage: "msg",
+						Type:           "type",
+					},
+				},
+			},
+			{
+				Name:     "task-4",
+				Driver:   "docker",
+				State:    "pending",
+				CPU:      100,
+				MemoryMB: 10,
+				DiskMB:   1000,
+				Config: map[string]interface{}{
+					"image": "docker-image",
+				},
+				Env: map[string]string{
+					"env-key": "env-value",
+				},
+				Events: []*api.TaskEvent{
+					{
+						DisplayMessage: "msg",
+						Type:           "type",
+					},
+				},
 			},
 		}
 
 		var selectCalled bool
-		at.Props.SelectAllocation = func(id string) {
+		at.Props.SelectTask = func(allocID, taskName string) {
 			selectCalled = true
 		}
 
@@ -73,50 +132,71 @@ func TestAllocation_Happy(t *testing.T) {
 
 		// It renders the correct header values
 		header := fakeTable.RenderHeaderArgsForCall(0)
-		r.Equal(component.TableHeaderAllocations, header)
+		r.Equal(component.TableHeaderTasks, header)
 
 		// It renders the correct number of rows
 		renderRowCallCount := fakeTable.RenderRowCallCount()
-		r.Equal(renderRowCallCount, 2)
+		r.Equal(renderRowCallCount, 4)
 
 		row1, index1, c1 := fakeTable.RenderRowArgsForCall(0)
 		row2, index2, c2 := fakeTable.RenderRowArgsForCall(1)
-		expectedRow1 := []string{"ichi", "tokio", "japan", "manga", "namespace", "[addr1]", "node", "node", "run"}
-		expectedRow2 := []string{"ni", "tokio", "japan", "manga", "namespace", "[addr2]", "node", "node", "stop"}
+		row3, index3, c3 := fakeTable.RenderRowArgsForCall(2)
+		row4, index4, c4 := fakeTable.RenderRowArgsForCall(3)
+
+		expectedRow1 := []string{"task-1", "running", "docker", "docker-image", "msg"}
+		expectedRow2 := []string{"task-2", "failed", "docker", "docker-image", "msg"}
+		expectedRow3 := []string{"task-3", "dead", "docker", "docker-image", "msg"}
+		expectedRow4 := []string{"task-4", "pending", "docker", "docker-image", "msg"}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)
 		r.Equal(expectedRow2, row2)
+		r.Equal(expectedRow3, row3)
+		r.Equal(expectedRow4, row4)
 
 		// It renders the data at the correct index
 		r.Equal(index1, 1)
 		r.Equal(index2, 2)
+		r.Equal(index3, 3)
+		r.Equal(index4, 4)
 
 		// It renders the rows in the correct color
 		r.Equal(c1, tcell.ColorWhite)
-		r.Equal(c2, tcell.ColorDarkGrey)
+		r.Equal(c2, tcell.ColorRed)
+		r.Equal(c3, tcell.ColorGray)
+		r.Equal(c4, tcell.ColorYellow)
 	})
 
 	t.Run("When render called again", func(t *testing.T) {
 		fakeTable := &componentfakes.FakeTable{}
-		at := component.NewAllocationTable()
+		at := component.NewTaskTable()
 
 		at.Table = fakeTable
-		at.Props.JobID = "japan"
-		at.Props.Data = []*models.Alloc{
+		at.Props.AllocationID = "japan"
+		at.Props.Data = []*models.Task{
 			{
-				ID:            "ichi",
-				TaskGroup:     "tokio",
-				JobID:         "japan",
-				JobType:       "manga",
-				Namespace:     "namespace",
-				NodeID:        "node",
-				NodeName:      "node",
-				DesiredStatus: "run",
+				Name:     "task-1",
+				Driver:   "docker",
+				State:    "running",
+				CPU:      100,
+				MemoryMB: 10,
+				DiskMB:   1000,
+				Config: map[string]interface{}{
+					"image": "docker-image",
+				},
+				Env: map[string]string{
+					"env-key": "env-value",
+				},
+				Events: []*api.TaskEvent{
+					{
+						DisplayMessage: "msg",
+						Type:           "type",
+					},
+				},
 			},
 		}
 
-		at.Props.SelectAllocation = func(id string) {}
+		at.Props.SelectTask = func(allocID, taskName string) {}
 		at.Props.HandleNoResources = func(format string, args ...interface{}) {}
 
 		slot := tview.NewFlex()
@@ -135,17 +215,17 @@ func TestAllocation_Happy(t *testing.T) {
 
 	t.Run("When there is no data to render", func(t *testing.T) {
 		fakeTable := &componentfakes.FakeTable{}
-		at := component.NewAllocationTable()
+		at := component.NewTaskTable()
 
 		at.Table = fakeTable
-		at.Props.JobID = "japan"
-		at.Props.Data = []*models.Alloc{}
-		at.Props.SelectAllocation = func(id string) {}
+		at.Props.AllocationID = "japan"
+		at.Props.Data = []*models.Task{}
+		at.Props.SelectTask = func(allocID, taskName string) {}
 
 		var handleNoResourcesCalled bool
 		at.Props.HandleNoResources = func(format string, args ...interface{}) {
 			handleNoResourcesCalled = true
-			r.Equal("%sno allocations available\n¯%s\\_( ͡• ͜ʖ ͡•)_/¯", format)
+			r.Equal("%sno tasks available\n¯%s\\_( ͡• ͜ʖ ͡•)_/¯", format)
 			r.Len(args, 2)
 			r.Equal(args[0], styles.HighlightPrimaryTag)
 			r.Equal(args[1], styles.HighlightSecondaryTag)
@@ -167,12 +247,12 @@ func TestAllocation_Happy(t *testing.T) {
 	})
 }
 
-func TestAllocation_Sad(t *testing.T) {
+func TestTasks_Sad(t *testing.T) {
 	r := require.New(t)
 
-	t.Run("When SelectAllocation is not set", func(t *testing.T) {
+	t.Run("When SelectTask is not set", func(t *testing.T) {
 		fakeTable := &componentfakes.FakeTable{}
-		at := component.NewAllocationTable()
+		at := component.NewTaskTable()
 
 		at.Table = fakeTable
 		at.Props.HandleNoResources = func(format string, args ...interface{}) {}
@@ -193,10 +273,10 @@ func TestAllocation_Sad(t *testing.T) {
 
 	t.Run("When HandleNoResources is not set", func(t *testing.T) {
 		fakeTable := &componentfakes.FakeTable{}
-		at := component.NewAllocationTable()
+		at := component.NewTaskTable()
 
 		at.Table = fakeTable
-		at.Props.SelectAllocation = func(id string) {}
+		at.Props.SelectTask = func(allocID, taskName string) {}
 
 		slot := tview.NewFlex()
 		at.Bind(slot)
@@ -214,10 +294,10 @@ func TestAllocation_Sad(t *testing.T) {
 
 	t.Run("When the component isn't bound", func(t *testing.T) {
 		fakeTable := &componentfakes.FakeTable{}
-		at := component.NewAllocationTable()
+		at := component.NewTaskTable()
 
 		at.Table = fakeTable
-		at.Props.SelectAllocation = func(id string) {}
+		at.Props.SelectTask = func(allocID, taskName string) {}
 		at.Props.HandleNoResources = func(format string, args ...interface{}) {}
 
 		// It errors

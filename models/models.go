@@ -80,8 +80,11 @@ type Alloc struct {
 	ID            string
 	Name          string
 	Namespace     string
+	HostIP        string
+	HostAddresses []string
 	TaskGroup     string
 	Tasks         []AllocTask
+	TaskList      []*Task
 	TaskNames     []string
 	JobID         string
 	JobType       string
@@ -101,6 +104,11 @@ type AllocTask struct {
 
 type Task struct {
 	Name     string
+	Driver   string
+	State    string
+	Events   []*api.TaskEvent
+	Config   map[string]interface{}
+	Env      map[string]string
 	Image    string
 	CPU      int
 	MemoryMB int

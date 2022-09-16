@@ -17,7 +17,11 @@ func TestJobAllocs(t *testing.T) {
 	r := require.New(t)
 
 	fakeClient := &nomadfakes.FakeJobClient{}
-	client := &nomad.Nomad{JobClient: fakeClient}
+	fakeAllocClient := &nomadfakes.FakeAllocationsClient{}
+	client := &nomad.Nomad{
+		JobClient:   fakeClient,
+		AllocClient: fakeAllocClient,
+	}
 
 	now := time.Now()
 
@@ -38,6 +42,7 @@ func TestJobAllocs(t *testing.T) {
 				ModifyTime:    100,
 				TaskStates: map[string]*api.TaskState{
 					"task-1": {
+						State: "running",
 						Events: []*api.TaskEvent{
 							{
 								Time:           now.UnixNano(),
@@ -63,11 +68,68 @@ func TestJobAllocs(t *testing.T) {
 				ModifyTime:    200,
 				TaskStates: map[string]*api.TaskState{
 					"task-2": {
+						State: "running",
 						Events: []*api.TaskEvent{
 							{
 								Time:           now.UnixNano(),
 								Type:           "type",
 								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
+			},
+		}, &api.QueryMeta{}, nil)
+
+		cpu, memory := 100, 10
+		tgName := "the-group"
+		fakeAllocClient.InfoReturnsOnCall(0, &api.Allocation{
+			TaskGroup: "the-group",
+			Job: &api.Job{
+				TaskGroups: []*api.TaskGroup{
+					{
+						Name: &tgName,
+						Tasks: []*api.Task{
+							{
+								Name:   "task-1",
+								Driver: "docker",
+								Env: map[string]string{
+									"env-key": "env-value",
+								},
+								Config: map[string]interface{}{
+									"image": "the-image-i-run",
+								},
+								Resources: &api.Resources{
+									CPU:      &cpu,
+									MemoryMB: &memory,
+								},
+							},
+						},
+					},
+				},
+			},
+		}, &api.QueryMeta{}, nil)
+
+		fakeAllocClient.InfoReturnsOnCall(1, &api.Allocation{
+			TaskGroup: "the-group",
+			Job: &api.Job{
+				TaskGroups: []*api.TaskGroup{
+					{
+						Name: &tgName,
+						Tasks: []*api.Task{
+							{
+								Name:   "task-2",
+								Driver: "docker",
+								Env: map[string]string{
+									"env-key": "env-value",
+								},
+								Config: map[string]interface{}{
+									"image": "the-image-i-run",
+								},
+								Resources: &api.Resources{
+									CPU:      &cpu,
+									MemoryMB: &memory,
+								},
 							},
 						},
 					},
@@ -109,6 +171,28 @@ func TestJobAllocs(t *testing.T) {
 						},
 					},
 				},
+				TaskList: []*models.Task{
+					{
+						Name:   "task-1",
+						Driver: "docker",
+						State:  "running",
+						Env: map[string]string{
+							"env-key": "env-value",
+						},
+						Config: map[string]interface{}{
+							"image": "the-image-i-run",
+						},
+						CPU:      cpu,
+						MemoryMB: memory,
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
 			},
 			{
 				ID:            "id-two",
@@ -127,6 +211,28 @@ func TestJobAllocs(t *testing.T) {
 				Tasks: []models.AllocTask{
 					{
 						Name: "task-2",
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
+				TaskList: []*models.Task{
+					{
+						Name:   "task-2",
+						Driver: "docker",
+						State:  "running",
+						Env: map[string]string{
+							"env-key": "env-value",
+						},
+						Config: map[string]interface{}{
+							"image": "the-image-i-run",
+						},
+						CPU:      cpu,
+						MemoryMB: memory,
 						Events: []*api.TaskEvent{
 							{
 								Time:           now.UnixNano(),
@@ -172,6 +278,8 @@ func TestAllocations(t *testing.T) {
 	fakeClient := &nomadfakes.FakeAllocationsClient{}
 	client := &nomad.Nomad{AllocClient: fakeClient}
 
+	now := time.Now()
+
 	t.Run("When there are no issues", func(t *testing.T) {
 		fakeClient.ListReturns([]*api.AllocationListStub{
 			{
@@ -186,6 +294,18 @@ func TestAllocations(t *testing.T) {
 				ClientStatus:  "ClientStatus",
 				CreateTime:    100,
 				ModifyTime:    100,
+				TaskStates: map[string]*api.TaskState{
+					"task-1": {
+						State: "running",
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
 			},
 			{
 				ID:            "id-two",
@@ -199,6 +319,74 @@ func TestAllocations(t *testing.T) {
 				ClientStatus:  "ClientStatus",
 				CreateTime:    200,
 				ModifyTime:    200,
+				TaskStates: map[string]*api.TaskState{
+					"task-2": {
+						State: "running",
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
+			},
+		}, &api.QueryMeta{}, nil)
+
+		cpu, memory := 100, 10
+		tgName := "the-group"
+		fakeClient.InfoReturnsOnCall(0, &api.Allocation{
+			TaskGroup: "the-group",
+			Job: &api.Job{
+				TaskGroups: []*api.TaskGroup{
+					{
+						Name: &tgName,
+						Tasks: []*api.Task{
+							{
+								Name:   "task-1",
+								Driver: "docker",
+								Env: map[string]string{
+									"env-key": "env-value",
+								},
+								Config: map[string]interface{}{
+									"image": "the-image-i-run",
+								},
+								Resources: &api.Resources{
+									CPU:      &cpu,
+									MemoryMB: &memory,
+								},
+							},
+						},
+					},
+				},
+			},
+		}, &api.QueryMeta{}, nil)
+
+		fakeClient.InfoReturnsOnCall(1, &api.Allocation{
+			TaskGroup: "the-group",
+			Job: &api.Job{
+				TaskGroups: []*api.TaskGroup{
+					{
+						Name: &tgName,
+						Tasks: []*api.Task{
+							{
+								Name:   "task-2",
+								Driver: "docker",
+								Env: map[string]string{
+									"env-key": "env-value",
+								},
+								Config: map[string]interface{}{
+									"image": "the-image-i-run",
+								},
+								Resources: &api.Resources{
+									CPU:      &cpu,
+									MemoryMB: &memory,
+								},
+							},
+						},
+					},
+				},
 			},
 		}, &api.QueryMeta{}, nil)
 
@@ -222,6 +410,41 @@ func TestAllocations(t *testing.T) {
 				Status:        "ClientStatus",
 				Created:       time.Unix(0, 100),
 				Modified:      time.Unix(0, 100),
+				TaskNames:     []string{"task-1"},
+				Tasks: []models.AllocTask{
+					{
+						Name: "task-1",
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
+				TaskList: []*models.Task{
+					{
+						Name:   "task-1",
+						Driver: "docker",
+						State:  "running",
+						Env: map[string]string{
+							"env-key": "env-value",
+						},
+						Config: map[string]interface{}{
+							"image": "the-image-i-run",
+						},
+						CPU:      cpu,
+						MemoryMB: memory,
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
 			},
 			{
 				ID:            "id-two",
@@ -235,6 +458,41 @@ func TestAllocations(t *testing.T) {
 				Status:        "ClientStatus",
 				Created:       time.Unix(0, 200),
 				Modified:      time.Unix(0, 200),
+				TaskNames:     []string{"task-2"},
+				Tasks: []models.AllocTask{
+					{
+						Name: "task-2",
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
+				TaskList: []*models.Task{
+					{
+						Name:   "task-2",
+						Driver: "docker",
+						State:  "running",
+						Env: map[string]string{
+							"env-key": "env-value",
+						},
+						Config: map[string]interface{}{
+							"image": "the-image-i-run",
+						},
+						CPU:      cpu,
+						MemoryMB: memory,
+						Events: []*api.TaskEvent{
+							{
+								Time:           now.UnixNano(),
+								Type:           "type",
+								DisplayMessage: "msg",
+							},
+						},
+					},
+				},
 			},
 		}
 

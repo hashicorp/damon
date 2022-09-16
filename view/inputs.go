@@ -69,26 +69,6 @@ func (v *View) InputMainCommands(event *tcell.EventKey) *tcell.EventKey {
 }
 
 func (v *View) inputAllocs(event *tcell.EventKey) *tcell.EventKey {
-	switch event.Key() {
-	case tcell.KeyCtrlE:
-		r, c := v.components.AllocationTable.Table.GetSelection()
-		allocID := v.components.AllocationTable.Table.GetCellContent(r, c)
-
-		allocs, ok := v.getAllocation(allocID)
-		if !ok {
-			return nil
-		}
-
-		v.Logs(allocs.TaskNames, allocID, "stderr")
-
-		return nil
-	case tcell.KeyRune:
-		switch event.Rune() {
-		case 'e':
-			allocID := v.components.AllocationTable.GetIDForSelection()
-			v.TaskEvents(allocID)
-		}
-	}
 	return event
 }
 

@@ -16,6 +16,7 @@ const (
 
 	titleTaskGroups  = "taskgroups"
 	titleJobs        = "jobs"
+	titleTasks       = "tasks"
 	titleJobStatus   = "jobsstatus"
 	titleDeployments = "deployments"
 	titleNamespaces  = "namespaces"
@@ -69,6 +70,7 @@ type Components struct {
 	Commands        *component.Commands
 	Logo            *component.Logo
 	JobTable        *component.JobTable
+	TaskTable       *component.TaskTable
 	JobStatus       *component.JobStatus
 	DeploymentTable *component.DeploymentTable
 	NamespaceTable  *component.NamespaceTable

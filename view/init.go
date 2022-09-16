@@ -87,7 +87,6 @@ func (v *View) Init(version string) {
 
 	// JobTable
 	v.components.JobTable.Bind(v.Layout.Body)
-
 	v.components.JobTable.Props.HandleNoResources = v.handleNoResources
 
 	// JobStatus
@@ -108,15 +107,36 @@ func (v *View) Init(version string) {
 	v.components.AllocationTable.Bind(v.Layout.Body)
 	v.components.AllocationTable.Props.HandleNoResources = v.handleNoResources
 	v.components.AllocationTable.Props.SelectAllocation = func(allocID string) {
-		// Reset the LogSearch field in case there was a search string
-		// entered previously.
-		allocs, ok := v.getAllocation(allocID)
+		alloc, ok := v.getAllocation(allocID)
 		if !ok {
 			return
 		}
-		v.components.LogSearch.InputField.SetText("")
-		v.Logs(allocs.TaskNames, allocID, "stdout")
+
+		v.Tasks(alloc)
 	}
+
+	v.components.TaskTable.Bind(v.Layout.Body)
+	v.components.TaskTable.Props.HandleNoResources = v.handleNoResources
+	v.components.TaskTable.Props.SelectTask = func(taskName, allocID string) {
+		v.components.LogSearch.InputField.SetText("")
+		v.Logs(taskName, allocID, "stdout")
+	}
+	v.components.TaskTable.BindKey(tcell.KeyCtrlE, func(event *tcell.EventKey) {
+		r, c := v.components.TaskTable.Table.GetSelection()
+		taskName := v.components.TaskTable.Table.GetCellContent(r, c)
+		allocID := v.components.TaskTable.Props.AllocationID
+
+		v.Logs(taskName, allocID, "stderr")
+	})
+
+	v.components.TaskTable.BindKey(tcell.KeyRune, func(event *tcell.EventKey) {
+		switch event.Rune() {
+		case 'e':
+			allocID := v.components.TaskTable.Props.AllocationID
+			taskName := v.components.TaskTable.GetNameForSelection()
+			v.TaskEvents(allocID, taskName)
+		}
+	})
 
 	// TaskGroupTable
 	v.components.TaskGroupTable.Bind(v.Layout.Body)

@@ -22,6 +22,7 @@ var (
 		LabelJobID,
 		LabelType,
 		LabelNamespace,
+		LabelAddresses,
 		LabelNodeID,
 		LabelNodeName,
 		LabelDesiredStatus,
@@ -102,12 +103,14 @@ func (t *AllocationTable) reset() {
 
 func (t *AllocationTable) renderRows() {
 	for i, a := range t.Props.Data {
+		hostAddr := fmt.Sprintf("%v", a.HostAddresses)
 		row := []string{
 			a.ID,
 			a.TaskGroup,
 			a.JobID,
 			a.JobType,
 			a.Namespace,
+			hostAddr,
 			a.NodeID,
 			a.NodeName,
 			a.DesiredStatus,

@@ -5,10 +5,27 @@ import (
 	"sync"
 
 	"github.com/hashicorp/nomad/api"
+
 	"github.com/hcjulz/damon/nomad"
 )
 
 type FakeAllocationsClient struct {
+	InfoStub        func(string, *api.QueryOptions) (*api.Allocation, *api.QueryMeta, error)
+	infoMutex       sync.RWMutex
+	infoArgsForCall []struct {
+		arg1 string
+		arg2 *api.QueryOptions
+	}
+	infoReturns struct {
+		result1 *api.Allocation
+		result2 *api.QueryMeta
+		result3 error
+	}
+	infoReturnsOnCall map[int]struct {
+		result1 *api.Allocation
+		result2 *api.QueryMeta
+		result3 error
+	}
 	ListStub        func(*api.QueryOptions) ([]*api.AllocationListStub, *api.QueryMeta, error)
 	listMutex       sync.RWMutex
 	listArgsForCall []struct {
@@ -26,6 +43,74 @@ type FakeAllocationsClient struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeAllocationsClient) Info(arg1 string, arg2 *api.QueryOptions) (*api.Allocation, *api.QueryMeta, error) {
+	fake.infoMutex.Lock()
+	ret, specificReturn := fake.infoReturnsOnCall[len(fake.infoArgsForCall)]
+	fake.infoArgsForCall = append(fake.infoArgsForCall, struct {
+		arg1 string
+		arg2 *api.QueryOptions
+	}{arg1, arg2})
+	stub := fake.InfoStub
+	fakeReturns := fake.infoReturns
+	fake.recordInvocation("Info", []interface{}{arg1, arg2})
+	fake.infoMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2, ret.result3
+	}
+	return fakeReturns.result1, fakeReturns.result2, fakeReturns.result3
+}
+
+func (fake *FakeAllocationsClient) InfoCallCount() int {
+	fake.infoMutex.RLock()
+	defer fake.infoMutex.RUnlock()
+	return len(fake.infoArgsForCall)
+}
+
+func (fake *FakeAllocationsClient) InfoCalls(stub func(string, *api.QueryOptions) (*api.Allocation, *api.QueryMeta, error)) {
+	fake.infoMutex.Lock()
+	defer fake.infoMutex.Unlock()
+	fake.InfoStub = stub
+}
+
+func (fake *FakeAllocationsClient) InfoArgsForCall(i int) (string, *api.QueryOptions) {
+	fake.infoMutex.RLock()
+	defer fake.infoMutex.RUnlock()
+	argsForCall := fake.infoArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeAllocationsClient) InfoReturns(result1 *api.Allocation, result2 *api.QueryMeta, result3 error) {
+	fake.infoMutex.Lock()
+	defer fake.infoMutex.Unlock()
+	fake.InfoStub = nil
+	fake.infoReturns = struct {
+		result1 *api.Allocation
+		result2 *api.QueryMeta
+		result3 error
+	}{result1, result2, result3}
+}
+
+func (fake *FakeAllocationsClient) InfoReturnsOnCall(i int, result1 *api.Allocation, result2 *api.QueryMeta, result3 error) {
+	fake.infoMutex.Lock()
+	defer fake.infoMutex.Unlock()
+	fake.InfoStub = nil
+	if fake.infoReturnsOnCall == nil {
+		fake.infoReturnsOnCall = make(map[int]struct {
+			result1 *api.Allocation
+			result2 *api.QueryMeta
+			result3 error
+		})
+	}
+	fake.infoReturnsOnCall[i] = struct {
+		result1 *api.Allocation
+		result2 *api.QueryMeta
+		result3 error
+	}{result1, result2, result3}
 }
 
 func (fake *FakeAllocationsClient) List(arg1 *api.QueryOptions) ([]*api.AllocationListStub, *api.QueryMeta, error) {
@@ -98,6 +183,8 @@ func (fake *FakeAllocationsClient) ListReturnsOnCall(i int, result1 []*api.Alloc
 func (fake *FakeAllocationsClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.infoMutex.RLock()
+	defer fake.infoMutex.RUnlock()
 	fake.listMutex.RLock()
 	defer fake.listMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

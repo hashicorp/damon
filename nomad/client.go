@@ -24,6 +24,7 @@ type JobClient interface {
 //go:generate counterfeiter . AllocationsClient
 type AllocationsClient interface {
 	List(*api.QueryOptions) ([]*api.AllocationListStub, *api.QueryMeta, error)
+	Info(string, *api.QueryOptions) (*api.Allocation, *api.QueryMeta, error)
 }
 
 //go:generate counterfeiter . AllocFSClient

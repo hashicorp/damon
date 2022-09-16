@@ -95,11 +95,12 @@ On every table or text view, you can use:
 - Filter Job: `</>` (on the selected job)
 - Show Job Info: `i` (on the selected job)
 
-### Allocation View Commands
+### Task View Commands
 
-- Show logs on `STDOUT` for an allocation: `<ENTER>`
-- Show logs on `STDERR` for an allocation: `<ctrl-e>`
-- Show events for an allocation: `<e>`
+- Show logs on `STDOUT` for a Task: `<ENTER>`
+- Show logs on `STDERR` for a Task: `<ctrl-e>`
+- Show events for a Task: `<e>`
+
 
 ### Log View
 

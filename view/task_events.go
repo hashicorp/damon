@@ -8,7 +8,7 @@ import (
 	"github.com/hcjulz/damon/models"
 )
 
-func (v *View) TaskEvents(allocID string) {
+func (v *View) TaskEvents(allocID, taskName string) {
 	v.Layout.Body.SetTitle(titleTaskEvents)
 	v.state.Elements.TableMain = v.components.TaskEventsTable.Table.Primitive().(*tview.Table)
 
@@ -21,17 +21,13 @@ func (v *View) TaskEvents(allocID string) {
 		return
 	}
 
-	tasks := alloc.Tasks
-	if len(tasks) == 0 {
-		v.handleError("no tasks for allocID %s", allocID)
-		return
-	}
+	task := getTaskFromAlloc(alloc, taskName)
 
 	// reverse the events array to show latest event on top.
-	reverseEvents(tasks[0].Events)
+	reverseEvents(task.Events)
 
 	update := func() {
-		v.components.TaskEventsTable.Props.Data = tasks[0].Events
+		v.components.TaskEventsTable.Props.Data = task.Events
 		v.components.TaskEventsTable.Props.AllocID = allocID
 		v.components.TaskEventsTable.Props.HandleNoResources = v.handleNoResources
 		v.components.TaskEventsTable.Render()
@@ -44,14 +40,24 @@ func (v *View) TaskEvents(allocID string) {
 
 	v.components.Selections.Namespace.SetSelectedFunc(func(text string, index int) {
 		v.state.SelectedNamespace = text
-		v.TaskEvents(allocID)
+		v.TaskEvents(allocID, taskName)
 	})
 
 	v.addToHistory(v.state.SelectedNamespace, api.TopicAllocation, func() {
-		v.TaskEvents(allocID)
+		v.TaskEvents(allocID, taskName)
 	})
 
 	v.Layout.Container.SetFocus(v.components.TaskEventsTable.Table.Primitive())
+}
+
+func getTaskFromAlloc(alloc *models.Alloc, taskName string) *models.Task {
+	for _, t := range alloc.TaskList {
+		if t.Name == taskName {
+			return t
+		}
+	}
+
+	return nil
 }
 
 func reverseEvents(e []*api.TaskEvent) {

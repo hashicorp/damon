@@ -79,6 +79,21 @@ func TestJobAllocs(t *testing.T) {
 					},
 				},
 			},
+			{
+				ID:            "id-three",
+				TaskGroup:     "the-group",
+				Namespace:     "namespace",
+				JobID:         "the-job",
+				JobType:       "the-type",
+				NodeID:        "node-id",
+				NodeName:      "nodejs",
+				DesiredStatus: "skate",
+				JobVersion:    200,
+				ClientStatus:  "ClientStatus",
+				CreateTime:    200,
+				ModifyTime:    200,
+				TaskStates:    map[string]*api.TaskState{},
+			},
 		}, &api.QueryMeta{}, nil)
 
 		cpu, memory := 100, 10
@@ -137,8 +152,35 @@ func TestJobAllocs(t *testing.T) {
 			},
 		}, &api.QueryMeta{}, nil)
 
+		fakeAllocClient.InfoReturnsOnCall(2, &api.Allocation{
+			TaskGroup: "the-group",
+			Job: &api.Job{
+				TaskGroups: []*api.TaskGroup{
+					{
+						Name: &tgName,
+						Tasks: []*api.Task{
+							{
+								Name:   "task-3",
+								Driver: "docker",
+								Env: map[string]string{
+									"env-key": "env-value",
+								},
+								Config: map[string]interface{}{
+									"image": "the-image-i-run",
+								},
+								Resources: &api.Resources{
+									CPU:      &cpu,
+									MemoryMB: &memory,
+								},
+							},
+						},
+					},
+				},
+			},
+		}, &api.QueryMeta{}, nil)
+
 		qo := &nomad.SearchOptions{
-			Namespace: "nodejs",
+			Namespace: "namespace",
 		}
 
 		allocs, err := client.JobAllocs("the-job", qo)
@@ -240,6 +282,40 @@ func TestJobAllocs(t *testing.T) {
 								DisplayMessage: "msg",
 							},
 						},
+					},
+				},
+			},
+			{
+				ID:            "id-three",
+				TaskGroup:     "the-group",
+				Namespace:     "namespace",
+				JobID:         "the-job",
+				JobType:       "the-type",
+				NodeID:        "node-id",
+				NodeName:      "nodejs",
+				DesiredStatus: "skate",
+				Version:       200,
+				Status:        "ClientStatus",
+				Created:       time.Unix(0, 200),
+				Modified:      time.Unix(0, 200),
+				TaskNames:     []string{"task-3"},
+				Tasks: []models.AllocTask{
+					{
+						Name: "task-3",
+					},
+				},
+				TaskList: []*models.Task{
+					{
+						Name:   "task-3",
+						Driver: "docker",
+						Env: map[string]string{
+							"env-key": "env-value",
+						},
+						Config: map[string]interface{}{
+							"image": "the-image-i-run",
+						},
+						CPU:      cpu,
+						MemoryMB: memory,
 					},
 				},
 			},

@@ -58,13 +58,16 @@ func getTasksFromAlloc(taskStates map[string]*api.TaskState, alloc *api.Allocati
 	for _, t := range alloc.GetTaskGroup().Tasks {
 		task := &models.Task{
 			Name:     t.Name,
-			State:    taskStates[t.Name].State,
-			Events:   taskStates[t.Name].Events,
 			Driver:   t.Driver,
 			Env:      t.Env,
 			Config:   t.Config,
 			CPU:      *t.Resources.CPU,
 			MemoryMB: *t.Resources.MemoryMB,
+		}
+
+		if taskStates[t.Name] != nil {
+			task.State = taskStates[t.Name].State
+			task.Events = taskStates[t.Name].Events
 		}
 
 		tasks = append(tasks, task)
@@ -102,10 +105,10 @@ func (n *Nomad) toAllocs(list []*api.AllocationListStub) ([]*models.Alloc, error
 			Modified:      time.Unix(0, el.ModifyTime),
 		}
 
-		for k, t := range el.TaskStates {
-			alloc.TaskNames = append(alloc.TaskNames, k)
+		for _, t := range tasks {
+			alloc.TaskNames = append(alloc.TaskNames, t.Name)
 			alloc.Tasks = append(alloc.Tasks, models.AllocTask{
-				Name:   k,
+				Name:   t.Name,
 				Events: t.Events,
 			})
 		}

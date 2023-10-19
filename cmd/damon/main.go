@@ -44,7 +44,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	nomadClient, _ := nomad.New(nomad.Default)
+	nomadClient, err := nomad.New(nomad.Default)
+	if err != nil {
+		fmt.Println("failed to generate Nomad client: ", err)
+		os.Exit(1)
+	}
 
 	state := initializeState(nomadClient)
 

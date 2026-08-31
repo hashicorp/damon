@@ -25,13 +25,38 @@ func (n *Nomad) Jobs(so *SearchOptions) ([]*models.Job, error) {
 		return nil, fmt.Errorf("failed to retrieve job list: %w", err)
 	}
 
+	dep, _, err := n.DpClient.List(&api.QueryOptions{
+		Namespace: so.Namespace,
+		Region:    so.Region,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve job deployments: %w", err)
+	}
+
 	var jobs []*models.Job
 	for _, j := range jobList {
+		readyStatus, deploymentStatus := jobSummary(j.ID, dep)
 		job := toJob(j)
+		job.ReadyStatus = readyStatus
+		job.DeploymentStatus = deploymentStatus
 		jobs = append(jobs, job)
 	}
 
 	return jobs, err
+}
+
+func jobSummary(jobID string, dep []*api.Deployment) (models.ReadyStatus, string) {
+	taskGroupStatus, deploymentStatus := toTaskGroupStatus(jobID, dep)
+
+	status := models.ReadyStatus{}
+	for _, taskGroup := range taskGroupStatus {
+		status.Desired += taskGroup.Desired
+		status.Running += taskGroup.Placed
+		status.Healthy += taskGroup.Healthy
+		status.Unhealthy += taskGroup.Unhealthy
+	}
+
+	return status, deploymentStatus
 }
 
 func toJob(j *api.JobListStub) *models.Job {

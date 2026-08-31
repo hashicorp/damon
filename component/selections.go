@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	labelNamespaceDropdown = fmt.Sprintf("%sNamespace <s>: ▾ %s",
+	labelNamespaceDropdown = fmt.Sprintf("%sNamespace <n>: ▾ %s",
 		styles.HighlightSecondaryTag,
 		styles.StandardColorTag,
 	)

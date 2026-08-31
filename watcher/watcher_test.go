@@ -97,8 +97,12 @@ func TestWatch_Happy(t *testing.T) {
 		// watcher.SubscribeHandler(models.HandleError, handleErr)
 
 		// Setup expectations
-		expectedJobsInitialCall := []*models.Job{{ID: "jupiter"}}
-		expectedJobsUpdated := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
+		// Note: TopicAllocation also triggers a Jobs refresh (ready-status
+		// depends on allocation health), so Watch()'s startup sequence calls
+		// nomad.Jobs() twice (once for TopicJob, once for TopicAllocation)
+		// before any event arrives.
+		expectedJobsInitialCall := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
+		expectedJobsUpdated := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}, {ID: "mars"}}
 
 		// callCount indicates how often the subscriber was notified
 		var callCount int
@@ -121,6 +125,11 @@ func TestWatch_Happy(t *testing.T) {
 		nomad.JobsReturnsOnCall(1, []*models.Job{
 			{ID: "jupiter"},
 			{ID: "saturn"},
+		}, nil)
+		nomad.JobsReturnsOnCall(2, []*models.Job{
+			{ID: "jupiter"},
+			{ID: "saturn"},
+			{ID: "mars"},
 		}, nil)
 
 		go watcher.Watch()
@@ -150,7 +159,7 @@ func TestWatch_Happy(t *testing.T) {
 
 		// Check that the call counts for each function haven't been called
 		// more often than expected.
-		r.Equal(nomad.JobsCallCount(), 2)
+		r.Equal(nomad.JobsCallCount(), 3)
 	})
 
 	t.Run("When the subscriber subscribes for multiple topics", func(t *testing.T) {
@@ -166,6 +175,9 @@ func TestWatch_Happy(t *testing.T) {
 		watcher := watcher.NewWatcher(state, nomad, time.Second*2)
 
 		// Setup expectations
+		// Note: TopicAllocation also triggers a Jobs refresh, so Watch()'s
+		// startup sequence calls nomad.Jobs() twice (TopicJob, TopicAllocation),
+		// and the two-event batch below triggers it twice more.
 		expectedJobsInitialCall := []*models.Job{{ID: "jupiter"}}
 		expectedJobsUpdated := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
 		expectedAllocsInitialCall := []*models.Alloc{{ID: "bumblebee"}}
@@ -189,7 +201,12 @@ func TestWatch_Happy(t *testing.T) {
 
 		// Declare what the the fake client should return on the different calls
 		nomad.JobsReturnsOnCall(0, []*models.Job{{ID: "jupiter"}}, nil)
-		nomad.JobsReturnsOnCall(1, []*models.Job{
+		nomad.JobsReturnsOnCall(1, []*models.Job{{ID: "jupiter"}}, nil)
+		nomad.JobsReturnsOnCall(2, []*models.Job{
+			{ID: "jupiter"},
+			{ID: "saturn"},
+		}, nil)
+		nomad.JobsReturnsOnCall(3, []*models.Job{
 			{ID: "jupiter"},
 			{ID: "saturn"},
 		}, nil)
@@ -230,7 +247,7 @@ func TestWatch_Happy(t *testing.T) {
 		r.Equal(expectedJobsUpdated, state.Jobs)
 		r.Equal(expectedAllocsUpdated, state.Allocations)
 
-		r.Equal(nomad.JobsCallCount(), 2)
+		r.Equal(nomad.JobsCallCount(), 4)
 		r.Equal(nomad.AllocationsCallCount(), 2)
 	})
 
@@ -260,7 +277,10 @@ func TestWatch_Happy(t *testing.T) {
 		nomad.StreamReturns(eventCh, nil)
 
 		expectedJobs := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}
-		nomad.JobsReturnsOnCall(1, expectedJobs, nil)
+		// Call 0 happens for TopicJob at startup, call 1 for the TopicAllocation
+		// startup refresh (job ready-status depends on allocations) — the Job
+		// topic event we send below triggers call 2.
+		nomad.JobsReturnsOnCall(2, expectedJobs, nil)
 
 		go watcher.Watch()
 
@@ -299,8 +319,12 @@ func TestWatch_Happy(t *testing.T) {
 		// ...and let the fake nomad client return it.
 		nomad.StreamReturns(eventCh, nil)
 
-		// Declare what the the fake client should return on the different calls
-		nomad.JobsReturnsOnCall(1, []*models.Job{
+		// Declare what the the fake client should return on the different calls.
+		// Calls 0 and 1 happen during Watch()'s startup sequence (TopicJob,
+		// then TopicAllocation's own Jobs refresh); the event batch below
+		// triggers call 2 (TopicJob event) and call 3 (TopicAllocation event,
+		// which writes state.Jobs last since it's processed last in the batch).
+		nomad.JobsReturnsOnCall(3, []*models.Job{
 			{ID: "jupiter"},
 			{ID: "saturn"},
 		}, nil)
@@ -338,7 +362,7 @@ func TestWatch_Happy(t *testing.T) {
 		r.Eventually(func() bool {
 			return nomad.AllocationsCallCount() == 2 &&
 				nomad.DeploymentsCallCount() == 2 &&
-				nomad.JobsCallCount() == 2
+				nomad.JobsCallCount() == 4
 		}, time.Second*5, time.Microsecond*5)
 
 		expectedJobs := []*models.Job{{ID: "jupiter"}, {ID: "saturn"}}

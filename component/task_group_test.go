@@ -61,8 +61,8 @@ func TestTaskGroupTable_Happy(t *testing.T) {
 		row1, index1, c1 := fakeTable.RenderRowArgsForCall(0)
 		row2, index2, c2 := fakeTable.RenderRowArgsForCall(1)
 
-		expectedRow1 := []string{"ichi", "earth", "0", "0", "0", "0", "0", "0"}
-		expectedRow2 := []string{"ni", "neptun", "0", "0", "0", "0", "0", "0"}
+		expectedRow1 := []string{"1", "ichi", "earth", "0", "0", "0", "0", "0", "0"}
+		expectedRow2 := []string{"2", "ni", "neptun", "0", "0", "0", "0", "0", "0"}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)

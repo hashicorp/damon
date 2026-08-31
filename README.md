@@ -19,7 +19,7 @@ before submitting one. Thank you!
 
 ## Screenshot
 
-![image](https://user-images.githubusercontent.com/82210389/126840047-dd96be77-f7fc-4903-972a-c783cc615a33.png)
+![screenshot](docs/screenshot.png)
 
 
 ## Installation

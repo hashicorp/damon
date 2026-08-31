@@ -122,8 +122,17 @@ func (n *Nomad) toAllocs(list []*api.AllocationListStub) ([]*models.Alloc, error
 					alloc.HostAddresses,
 					fmt.Sprintf("%s/%s:%d", net.Label, net.HostIP, net.Value),
 				)
+				alloc.HostPorts = append(alloc.HostPorts, models.HostPort{
+					Label:  net.Label,
+					HostIP: net.HostIP,
+					Port:   net.Value,
+				})
 			}
 
+			for _, t := range a.AllocatedResources.Tasks {
+				alloc.AllocatedCPU += int(t.Cpu.CpuShares)
+				alloc.AllocatedMemMB += int(t.Memory.MemoryMB)
+			}
 		}
 
 		result = append(result, alloc)

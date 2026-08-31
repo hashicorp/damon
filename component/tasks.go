@@ -5,6 +5,7 @@ package component
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -20,6 +21,7 @@ const (
 
 var (
 	TableHeaderTasks = []string{
+		LabelLineNumber,
 		LabelName,
 		LabelState,
 		LabelDriver,
@@ -114,7 +116,10 @@ func (t *TaskTable) reset() {
 
 func (t *TaskTable) renderRows() {
 	for i, task := range t.Props.Data {
+		index := i + 1
+
 		row := []string{
+			strconv.Itoa(index),
 			task.Name,
 			task.State,
 			task.Driver,
@@ -127,8 +132,6 @@ func (t *TaskTable) renderRows() {
 		row = append(row, task.Events[len(task.Events)-1].DisplayMessage)
 		// row = append(row, strconv.Itoa(task.CPU))
 		// row = append(row, strconv.Itoa(task.MemoryMB))
-
-		index := i + 1
 
 		c := t.getCellColor(task.State)
 		t.Table.RenderRow(row, index, c)
@@ -151,13 +154,13 @@ func (t *TaskTable) getCellColor(status string) tcell.Color {
 }
 
 func (t *TaskTable) taskSelected(row, column int) {
-	taskName := t.Table.GetCellContent(row, 0)
+	taskName := t.Table.GetCellContent(row, 1)
 	t.Props.SelectTask(taskName, t.Props.AllocationID)
 }
 
 func (t *TaskTable) GetNameForSelection() string {
 	row, _ := t.Table.GetSelection()
-	return t.Table.GetCellContent(row, 0)
+	return t.Table.GetCellContent(row, 1)
 }
 
 func (t *TaskTable) BindKey(key tcell.Key, fn func(event *tcell.EventKey)) {

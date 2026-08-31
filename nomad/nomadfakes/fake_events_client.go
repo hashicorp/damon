@@ -100,8 +100,6 @@ func (fake *FakeEventsClient) StreamReturnsOnCall(i int, result1 <-chan *api.Eve
 func (fake *FakeEventsClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.streamMutex.RLock()
-	defer fake.streamMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

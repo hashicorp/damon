@@ -60,8 +60,8 @@ func TestNamespaceTable_Happy(t *testing.T) {
 		row1, index1, c1 := fakeTable.RenderRowArgsForCall(0)
 		row2, index2, c2 := fakeTable.RenderRowArgsForCall(1)
 
-		expectedRow1 := []string{"ichi", "one in japanese"}
-		expectedRow2 := []string{"ni", "two in japanese"}
+		expectedRow1 := []string{"1", "ichi", "one in japanese"}
+		expectedRow2 := []string{"2", "ni", "two in japanese"}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)

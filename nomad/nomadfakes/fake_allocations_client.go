@@ -2,14 +2,37 @@
 package nomadfakes
 
 import (
+	"context"
+	"io"
 	"sync"
 
 	"github.com/hashicorp/nomad/api"
-
 	"github.com/hcjulz/damon/nomad"
 )
 
 type FakeAllocationsClient struct {
+	ExecStub        func(context.Context, *api.Allocation, string, bool, []string, io.Reader, io.Writer, io.Writer, <-chan api.TerminalSize, *api.QueryOptions) (int, error)
+	execMutex       sync.RWMutex
+	execArgsForCall []struct {
+		arg1  context.Context
+		arg2  *api.Allocation
+		arg3  string
+		arg4  bool
+		arg5  []string
+		arg6  io.Reader
+		arg7  io.Writer
+		arg8  io.Writer
+		arg9  <-chan api.TerminalSize
+		arg10 *api.QueryOptions
+	}
+	execReturns struct {
+		result1 int
+		result2 error
+	}
+	execReturnsOnCall map[int]struct {
+		result1 int
+		result2 error
+	}
 	InfoStub        func(string, *api.QueryOptions) (*api.Allocation, *api.QueryMeta, error)
 	infoMutex       sync.RWMutex
 	infoArgsForCall []struct {
@@ -43,6 +66,84 @@ type FakeAllocationsClient struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeAllocationsClient) Exec(arg1 context.Context, arg2 *api.Allocation, arg3 string, arg4 bool, arg5 []string, arg6 io.Reader, arg7 io.Writer, arg8 io.Writer, arg9 <-chan api.TerminalSize, arg10 *api.QueryOptions) (int, error) {
+	var arg5Copy []string
+	if arg5 != nil {
+		arg5Copy = make([]string, len(arg5))
+		copy(arg5Copy, arg5)
+	}
+	fake.execMutex.Lock()
+	ret, specificReturn := fake.execReturnsOnCall[len(fake.execArgsForCall)]
+	fake.execArgsForCall = append(fake.execArgsForCall, struct {
+		arg1  context.Context
+		arg2  *api.Allocation
+		arg3  string
+		arg4  bool
+		arg5  []string
+		arg6  io.Reader
+		arg7  io.Writer
+		arg8  io.Writer
+		arg9  <-chan api.TerminalSize
+		arg10 *api.QueryOptions
+	}{arg1, arg2, arg3, arg4, arg5Copy, arg6, arg7, arg8, arg9, arg10})
+	stub := fake.ExecStub
+	fakeReturns := fake.execReturns
+	fake.recordInvocation("Exec", []interface{}{arg1, arg2, arg3, arg4, arg5Copy, arg6, arg7, arg8, arg9, arg10})
+	fake.execMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeAllocationsClient) ExecCallCount() int {
+	fake.execMutex.RLock()
+	defer fake.execMutex.RUnlock()
+	return len(fake.execArgsForCall)
+}
+
+func (fake *FakeAllocationsClient) ExecCalls(stub func(context.Context, *api.Allocation, string, bool, []string, io.Reader, io.Writer, io.Writer, <-chan api.TerminalSize, *api.QueryOptions) (int, error)) {
+	fake.execMutex.Lock()
+	defer fake.execMutex.Unlock()
+	fake.ExecStub = stub
+}
+
+func (fake *FakeAllocationsClient) ExecArgsForCall(i int) (context.Context, *api.Allocation, string, bool, []string, io.Reader, io.Writer, io.Writer, <-chan api.TerminalSize, *api.QueryOptions) {
+	fake.execMutex.RLock()
+	defer fake.execMutex.RUnlock()
+	argsForCall := fake.execArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5, argsForCall.arg6, argsForCall.arg7, argsForCall.arg8, argsForCall.arg9, argsForCall.arg10
+}
+
+func (fake *FakeAllocationsClient) ExecReturns(result1 int, result2 error) {
+	fake.execMutex.Lock()
+	defer fake.execMutex.Unlock()
+	fake.ExecStub = nil
+	fake.execReturns = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeAllocationsClient) ExecReturnsOnCall(i int, result1 int, result2 error) {
+	fake.execMutex.Lock()
+	defer fake.execMutex.Unlock()
+	fake.ExecStub = nil
+	if fake.execReturnsOnCall == nil {
+		fake.execReturnsOnCall = make(map[int]struct {
+			result1 int
+			result2 error
+		})
+	}
+	fake.execReturnsOnCall[i] = struct {
+		result1 int
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeAllocationsClient) Info(arg1 string, arg2 *api.QueryOptions) (*api.Allocation, *api.QueryMeta, error) {
@@ -183,10 +284,6 @@ func (fake *FakeAllocationsClient) ListReturnsOnCall(i int, result1 []*api.Alloc
 func (fake *FakeAllocationsClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.infoMutex.RLock()
-	defer fake.infoMutex.RUnlock()
-	fake.listMutex.RLock()
-	defer fake.listMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

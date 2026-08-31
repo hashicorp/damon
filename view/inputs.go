@@ -25,7 +25,7 @@ func (v *View) InputTaskGroups(event *tcell.EventKey) *tcell.EventKey {
 }
 
 func (v *View) InputAllocations(event *tcell.EventKey) *tcell.EventKey {
-	v.InputMainCommands(event)
+	event = v.InputMainCommands(event)
 	return v.inputAllocs(event)
 }
 
@@ -47,6 +47,21 @@ func (v *View) InputMainCommands(event *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyCtrlO, tcell.KeyEsc:
 		v.GoBack()
 
+	case tcell.KeyLeft:
+		// Same as Esc, but only when not editing a footer input field,
+		// where the left arrow needs to keep moving the text cursor.
+		if !v.Layout.Footer.HasFocus() {
+			v.GoBack()
+		}
+
+	case tcell.KeyRight:
+		// Same as pressing Enter on the currently selected row, but only
+		// when not editing a footer input field, where the right arrow
+		// needs to keep moving the text cursor.
+		if !v.Layout.Footer.HasFocus() {
+			return tcell.NewEventKey(tcell.KeyEnter, 0, tcell.ModNone)
+		}
+
 	case tcell.KeyCtrlP:
 		if !v.Layout.Footer.HasFocus() {
 			v.Layout.Container.SetFocus(v.components.LogSearch.InputField.Primitive())
@@ -61,9 +76,40 @@ func (v *View) InputMainCommands(event *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyRune:
 		switch event.Rune() {
 
-		case 's':
+		case 'n':
 			if !v.Layout.Footer.HasFocus() {
 				v.Layout.Container.SetFocus(v.state.Elements.DropDownNamespace)
+			}
+
+		case 'h':
+			if !v.Layout.Footer.HasFocus() {
+				v.GoBack()
+			}
+
+		case 'j':
+			if !v.Layout.Footer.HasFocus() {
+				return tcell.NewEventKey(tcell.KeyDown, 0, tcell.ModNone)
+			}
+
+		case 'k':
+			if !v.Layout.Footer.HasFocus() {
+				return tcell.NewEventKey(tcell.KeyUp, 0, tcell.ModNone)
+			}
+
+		case 'l':
+			if !v.Layout.Footer.HasFocus() {
+				return tcell.NewEventKey(tcell.KeyEnter, 0, tcell.ModNone)
+			}
+
+		case ':':
+			if !v.Layout.Footer.HasFocus() {
+				if !v.state.Toggle.GotoLine {
+					v.state.Toggle.GotoLine = true
+					v.GotoLine()
+				} else {
+					v.Layout.Container.SetFocus(v.components.GotoLine.InputField.Primitive())
+				}
+				return nil
 			}
 		}
 	}
@@ -77,9 +123,16 @@ func (v *View) inputAllocs(event *tcell.EventKey) *tcell.EventKey {
 
 func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 	switch event.Key() {
-	case tcell.KeyEsc, tcell.KeyCtrlO, tcell.KeyEnter:
+	case tcell.KeyEsc, tcell.KeyCtrlO, tcell.KeyEnter, tcell.KeyLeft:
 		if v.components.LogStream.TextView.Primitive().HasFocus() {
 			v.GoBack()
+			return nil
+		}
+	case tcell.KeyRight:
+		// There's nothing further to "enter" from the log view - flash
+		// instead of leaving, like a terminal's visual bell.
+		if v.components.LogStream.TextView.Primitive().HasFocus() {
+			v.FlashLogBorder()
 			return nil
 		}
 	case tcell.KeyRune:
@@ -96,6 +149,19 @@ func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 
 			}
 		case 'h':
+			if v.components.LogStream.TextView.Primitive().HasFocus() {
+				v.GoBack()
+				return nil
+			}
+
+		case 'l':
+			// There's nothing further to "enter" from the log view - flash
+			// instead of leaving, like a terminal's visual bell.
+			if v.components.LogStream.TextView.Primitive().HasFocus() {
+				v.FlashLogBorder()
+				return nil
+			}
+		case 'H':
 			if !v.Layout.Footer.HasFocus() {
 				if !v.state.Toggle.LogHighlight {
 					v.state.Toggle.LogHighlight = true
@@ -113,6 +179,13 @@ func (v *View) InputLogs(event *tcell.EventKey) *tcell.EventKey {
 			if !v.Layout.Footer.HasFocus() {
 				v.Watcher.ResumeLogs()
 
+			}
+		case 'p':
+			if !v.Layout.Footer.HasFocus() {
+				v.state.Toggle.PrettyJSON = !v.state.Toggle.PrettyJSON
+				v.components.LogStream.Props.PrettyJSON = v.state.Toggle.PrettyJSON
+				v.components.LogStream.Render()
+				v.Draw()
 			}
 		}
 	}

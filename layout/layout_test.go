@@ -32,6 +32,9 @@ func TestDefaultLayout(t *testing.T) {
 	r.NotNil(l.Header.SlotCmd)
 	r.IsType(l.Header.SlotCmd, &tview.Flex{})
 
+	r.NotNil(l.Header.SlotViewCmd)
+	r.IsType(l.Header.SlotViewCmd, &tview.Flex{})
+
 	r.NotNil(l.Header.SlotLogo)
 	r.IsType(l.Header.SlotLogo, &tview.Flex{})
 

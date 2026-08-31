@@ -29,9 +29,10 @@ type Elements struct {
 }
 
 type Header struct {
-	SlotInfo *tview.Flex
-	SlotCmd  *tview.Flex
-	SlotLogo *tview.Flex
+	SlotInfo    *tview.Flex
+	SlotCmd     *tview.Flex
+	SlotViewCmd *tview.Flex
+	SlotLogo    *tview.Flex
 }
 
 func EnableMouse(l *Layout) {
@@ -60,11 +61,13 @@ func Default(l *Layout) {
 	l.Header.SlotInfo.AddItem(l.Elements.Dropdowns, 0, 1, false)
 
 	l.Header.SlotCmd = tview.NewFlex()
+	l.Header.SlotViewCmd = tview.NewFlex()
 	l.Header.SlotLogo = tview.NewFlex()
 
 	header := tview.NewFlex().
 		AddItem(l.Header.SlotInfo, 0, 1, false).
-		AddItem(l.Header.SlotCmd, 0, 1, false).
+		AddItem(l.Header.SlotCmd, 0, 2, false).
+		AddItem(l.Header.SlotViewCmd, 0, 2, false).
 		AddItem(l.Header.SlotLogo, 0, 1, false)
 
 	header.SetBorderPadding(1, 1, 2, 2)
@@ -74,7 +77,7 @@ func Default(l *Layout) {
 
 	mainPage := tview.NewFlex().SetDirection(tview.FlexRow)
 	mainPage.
-		AddItem(header, 0, 4, false).
+		AddItem(header, 10, 0, false).
 		AddItem(body, 0, 12, false).
 		AddItem(footer, 0, 0, false)
 

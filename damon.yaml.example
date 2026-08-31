@@ -1,0 +1,35 @@
+# Example damon config file.
+#
+# damon looks for this file at ./damon.yaml (current working directory)
+# first, then falls back to ~/.config/damon/damon.yaml. Copy this file
+# to one of those locations (dropping the ".example" suffix) and edit
+# as needed. Every key is optional — an absent file, or an absent key,
+# falls back to the defaults noted below.
+
+# How often the header cluster-stats panel refreshes.
+# Default: 10s
+cluster_stats_refresh_interval: 10s
+
+# Controls whether/how damon shows live cluster CPU/memory utilization
+# in the header, sourced from a Prometheus server that scrapes your
+# Nomad agents (requires telemetry.publish_node_metrics = true on the
+# Nomad agents). One of:
+#   none     - disabled (default). Only Nomad-derived stats are shown.
+#   nomad    - auto-discover Prometheus's address from a running Nomad
+#              job on every poll (see prometheus_job/prometheus_port_label
+#              below). No prometheus_url needed.
+#   external - use a fixed prometheus_url below.
+prometheus_placement: none
+
+# Required when prometheus_placement is "external". Ignored otherwise.
+# prometheus_url: http://prometheus.example.com:9090
+
+# Used when prometheus_placement is "nomad". The Nomad job ID to look
+# up a running allocation for.
+# Default: prometheus
+# prometheus_job: prometheus
+
+# Used when prometheus_placement is "nomad". The port label (from the
+# job's network/service block) whose host address damon should query.
+# Default: http
+# prometheus_port_label: http

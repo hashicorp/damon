@@ -65,8 +65,8 @@ func TestTaskEventsTable_Happy(t *testing.T) {
 		row1, index1, c1 := fakeTable.RenderRowArgsForCall(0)
 		row2, index2, c2 := fakeTable.RenderRowArgsForCall(1)
 
-		expectedRow1 := []string{now.Format(time.RFC3339), "test-type", "test message"}
-		expectedRow2 := []string{now.Format(time.RFC3339), "test-type-2", "test message 2"}
+		expectedRow1 := []string{"1", now.Format(time.RFC3339), "test-type", "test message"}
+		expectedRow2 := []string{"2", now.Format(time.RFC3339), "test-type-2", "test message 2"}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)

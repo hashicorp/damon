@@ -80,10 +80,6 @@ func (fake *FakeActivities) DeactivateAllCalls(stub func()) {
 func (fake *FakeActivities) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.addMutex.RLock()
-	defer fake.addMutex.RUnlock()
-	fake.deactivateAllMutex.RLock()
-	defer fake.deactivateAllMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

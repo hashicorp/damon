@@ -5,11 +5,13 @@ package component
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
 	"sync"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 
 	"github.com/hcjulz/damon/models"
@@ -35,6 +37,7 @@ type LogStreamProps struct {
 	ChangedFunc       func()
 	TaskName          string
 	App               *tview.Application
+	PrettyJSON        bool
 }
 
 func NewLogger() *Logger {
@@ -49,6 +52,23 @@ func NewLogger() *Logger {
 	t.ModifyPrimitive(l.applyLogModifiers)
 	return l
 
+}
+
+// GetBorderColor returns the log view's current border color.
+func (l *Logger) GetBorderColor() tcell.Color {
+	var c tcell.Color
+	l.TextView.ModifyPrimitive(func(t *tview.TextView) {
+		c = t.GetBorderColor()
+	})
+	return c
+}
+
+// SetBorderColor sets the log view's border color, e.g. to briefly flash it
+// to indicate there's nowhere further to go.
+func (l *Logger) SetBorderColor(c tcell.Color) {
+	l.TextView.ModifyPrimitive(func(t *tview.TextView) {
+		t.SetBorderColor(c)
+	})
 }
 
 func (l *Logger) Bind(slot *tview.Flex) {
@@ -81,7 +101,15 @@ func (l *Logger) Render() error {
 		l.Props.Data = bytes.Join(lines, []byte("\n"))
 	}
 
-	display := filter(l.Props.Data, l.Props.Filter)
+	data := l.Props.Data
+	if l.Props.PrettyJSON {
+		// Pretty-printing turns 1 raw line into N display lines, so filter()'s
+		// per-line regex may then only match a sub-line of a JSON block rather
+		// than the whole entry. Acceptable known limitation for now.
+		data = prettifyJSONLines(data)
+	}
+
+	display := filter(data, l.Props.Filter)
 
 	if l.Props.Filter == "" {
 		display = highlight(display, l.Props.Highlight)
@@ -153,6 +181,26 @@ func filter(logs []byte, filter string) []byte {
 		}
 	}
 	return result
+}
+
+// prettifyJSONLines indents any line that parses as valid JSON, leaving
+// non-JSON lines untouched.
+func prettifyJSONLines(logs []byte) []byte {
+	lines := bytes.Split(logs, []byte("\n"))
+	out := make([][]byte, 0, len(lines))
+
+	for _, line := range lines {
+		if json.Valid(line) {
+			var buf bytes.Buffer
+			if err := json.Indent(&buf, line, "", "  "); err == nil {
+				out = append(out, buf.Bytes())
+				continue
+			}
+		}
+		out = append(out, line)
+	}
+
+	return bytes.Join(out, []byte("\n"))
 }
 
 func highlight(logs []byte, highlight string) []byte {

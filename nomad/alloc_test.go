@@ -595,4 +595,41 @@ func TestAllocations(t *testing.T) {
 		r.Error(err)
 		r.EqualError(err, "argh")
 	})
+
+	t.Run("When AllocatedResources are present, sums CPU and memory across tasks", func(t *testing.T) {
+		fakeClient.ListReturns([]*api.AllocationListStub{
+			{ID: "id-one", TaskStates: map[string]*api.TaskState{}},
+		}, &api.QueryMeta{}, nil)
+
+		fakeClient.InfoReturnsOnCall(2, &api.Allocation{
+			TaskGroup: "the-group",
+			Job: &api.Job{
+				TaskGroups: []*api.TaskGroup{
+					{Name: stringPtr("the-group")},
+				},
+			},
+			AllocatedResources: &api.AllocatedResources{
+				Tasks: map[string]*api.AllocatedTaskResources{
+					"task-1": {
+						Cpu:    api.AllocatedCpuResources{CpuShares: 500},
+						Memory: api.AllocatedMemoryResources{MemoryMB: 256},
+					},
+					"task-2": {
+						Cpu:    api.AllocatedCpuResources{CpuShares: 300},
+						Memory: api.AllocatedMemoryResources{MemoryMB: 128},
+					},
+				},
+			},
+		}, &api.QueryMeta{}, nil)
+
+		allocs, err := client.Allocations(nil)
+		r.NoError(err)
+		r.Len(allocs, 1)
+		r.Equal(800, allocs[0].AllocatedCPU)
+		r.Equal(384, allocs[0].AllocatedMemMB)
+	})
+}
+
+func stringPtr(s string) *string {
+	return &s
 }

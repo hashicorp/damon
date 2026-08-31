@@ -5,6 +5,7 @@ package nomad
 
 import (
 	"context"
+	"io"
 
 	"github.com/hashicorp/nomad/api"
 )
@@ -28,6 +29,9 @@ type JobClient interface {
 type AllocationsClient interface {
 	List(*api.QueryOptions) ([]*api.AllocationListStub, *api.QueryMeta, error)
 	Info(string, *api.QueryOptions) (*api.Allocation, *api.QueryMeta, error)
+	Exec(ctx context.Context, alloc *api.Allocation, task string, tty bool,
+		command []string, stdin io.Reader, stdout, stderr io.Writer,
+		terminalSizeCh <-chan api.TerminalSize, q *api.QueryOptions) (int, error)
 }
 
 //go:generate counterfeiter . AllocFSClient
@@ -50,6 +54,22 @@ type EventsClient interface {
 	Stream(ctx context.Context, topics map[api.Topic][]string, index uint64, q *api.QueryOptions) (<-chan *api.Events, error)
 }
 
+//go:generate counterfeiter . NodeClient
+type NodeClient interface {
+	List(*api.QueryOptions) ([]*api.NodeListStub, *api.QueryMeta, error)
+	Info(nodeID string, q *api.QueryOptions) (*api.Node, *api.QueryMeta, error)
+}
+
+//go:generate counterfeiter . StatusClient
+type StatusClient interface {
+	Leader() (string, error)
+}
+
+//go:generate counterfeiter . AgentClient
+type AgentClient interface {
+	Members() (*api.ServerMembers, error)
+}
+
 type SearchOptions struct {
 	Namespace string
 	Region    string
@@ -65,6 +85,9 @@ type Nomad struct {
 	AllocClient   AllocationsClient
 	AllocFSClient AllocFSClient
 	DpClient      DeploymentClient
+	NodeClient    NodeClient
+	StatusClient  StatusClient
+	AgentClient   AgentClient
 }
 
 func New(opts ...func(*Nomad) error) (*Nomad, error) {
@@ -93,6 +116,9 @@ func Default(n *Nomad) error {
 	n.AllocClient = client.Allocations()
 	n.AllocFSClient = client.AllocFS()
 	n.DpClient = client.Deployments()
+	n.NodeClient = client.Nodes()
+	n.StatusClient = client.Status()
+	n.AgentClient = client.Agent()
 
 	return nil
 }

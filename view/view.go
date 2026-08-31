@@ -4,7 +4,10 @@
 package view
 
 import (
+	"context"
+	"io"
 	"sync"
+	"time"
 
 	"github.com/hashicorp/nomad/api"
 
@@ -12,6 +15,7 @@ import (
 	"github.com/hcjulz/damon/layout"
 	"github.com/hcjulz/damon/models"
 	"github.com/hcjulz/damon/state"
+	"github.com/hcjulz/damon/styles"
 )
 
 const (
@@ -34,6 +38,8 @@ type Client interface {
 	GetJob(string) (*api.Job, error)
 	StartJob(job *api.Job) error
 	StopJob(string) error
+	Exec(ctx context.Context, allocID, taskName string, command []string,
+		stdin io.Reader, stdout, stderr io.Writer, resizeCh <-chan api.TerminalSize) (int, error)
 }
 
 // Watcher ...
@@ -49,6 +55,8 @@ type Watcher interface {
 	SubscribeToLogs(allocID, taskName, source string, notify func())
 
 	ResumeLogs()
+
+	WatchClusterStats(interval time.Duration, notify func())
 }
 
 type View struct {
@@ -71,7 +79,7 @@ type Components struct {
 	Selections      *component.Selections
 	SelectorModal   *component.SelectorModal
 	Commands        *component.Commands
-	Logo            *component.Logo
+	ClusterStats    *component.ClusterStats
 	JobTable        *component.JobTable
 	TaskTable       *component.TaskTable
 	JobStatus       *component.JobStatus
@@ -81,6 +89,7 @@ type Components struct {
 	TaskGroupTable  *component.TaskGroupTable
 	TaskEventsTable *component.TaskEventsTable
 	JumpToJob       *component.JumpToJob
+	GotoLine        *component.GotoLine
 	Error           *component.Error
 	Info            *component.Info
 	Failure         *component.Info
@@ -120,6 +129,32 @@ func (v *View) JumpToJob() {
 	v.Layout.MainPage.ResizeItem(v.Layout.Footer, 0, 1)
 	jump.Render()
 	v.Layout.Container.SetFocus(jump.InputField.Primitive())
+}
+
+func (v *View) GotoLine() {
+	gotoLine := v.components.GotoLine
+	v.Layout.MainPage.ResizeItem(v.Layout.Footer, 0, 1)
+	gotoLine.Render()
+	v.Layout.Container.SetFocus(gotoLine.InputField.Primitive())
+}
+
+const flashDuration = 120 * time.Millisecond
+
+// FlashLogBorder briefly flashes the log view's border, to indicate a
+// keypress had nowhere to go (e.g. "enter" pressed with nothing further to
+// drill into), similar to a terminal's visual bell.
+func (v *View) FlashLogBorder() {
+	logStream := v.components.LogStream
+	original := logStream.GetBorderColor()
+
+	logStream.SetBorderColor(styles.TcellColorAttention)
+	v.Draw()
+
+	go func() {
+		time.Sleep(flashDuration)
+		logStream.SetBorderColor(original)
+		v.Draw()
+	}()
 }
 
 func (v *View) LogSearch() {

@@ -107,8 +107,6 @@ func (fake *FakeAllocFSClient) LogsReturnsOnCall(i int, result1 <-chan *api.Stre
 func (fake *FakeAllocFSClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.logsMutex.RLock()
-	defer fake.logsMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

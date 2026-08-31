@@ -31,6 +31,12 @@ type Nomad interface {
 	JobAllocs(string, *nomad.SearchOptions) ([]*models.Alloc, error)
 	Logs(allocID, taskNmae, logType string, cancel <-chan struct{}) (<-chan *api.StreamFrame, <-chan error)
 	Stream(topics nomad.Topics, index uint64) (<-chan *api.Events, error)
+	ClusterStats(allocs []*models.Alloc, jobs []*models.Job, so *nomad.SearchOptions) (*models.ClusterStats, error)
+}
+
+//go:generate counterfeiter . PrometheusClient
+type PrometheusClient interface {
+	ClusterUtilization() (*models.ResourceUtilization, error)
 }
 
 // Watcher watches a Nomad cluster for updates and
@@ -42,6 +48,8 @@ type Watcher struct {
 	logResumer *logResumer
 	handlers   map[models.Handler]func(msg string, args ...interface{})
 	nomad      Nomad
+	prometheus PrometheusClient
+	promDisc   *prometheusDiscovery
 
 	forceUpdate chan api.Topic
 	activities  Activities
@@ -68,6 +76,29 @@ func NewWatcher(state *state.State, nomad Nomad, interval time.Duration) *Watche
 		activities:  &ActivityPool{},
 		interval:    interval,
 	}
+}
+
+// SetPrometheusClient wires a static, externally-configured Prometheus
+// client used by WatchClusterStats to enrich cluster stats with live
+// utilization metrics. When unset (and SetPrometheusDiscovery isn't
+// used either), cluster stats simply omit utilization data.
+func (w *Watcher) SetPrometheusClient(p PrometheusClient) {
+	w.prometheus = p
+	w.promDisc = nil
+}
+
+type prometheusDiscovery struct {
+	jobID     string
+	portLabel string
+}
+
+// SetPrometheusDiscovery configures WatchClusterStats to locate
+// Prometheus's address from a running Nomad job on every poll,
+// instead of using a fixed URL. This is mutually exclusive with
+// SetPrometheusClient; whichever is set last wins.
+func (w *Watcher) SetPrometheusDiscovery(jobID, portLabel string) {
+	w.promDisc = &prometheusDiscovery{jobID: jobID, portLabel: portLabel}
+	w.prometheus = nil
 }
 
 // Subscribe subscribes a function to a topic. This function should always be
@@ -157,6 +188,9 @@ func (w *Watcher) update(topic api.Topic) {
 		w.updateJobs()
 	case api.TopicAllocation:
 		w.updateAllocations()
+		// Allocation health drives job ready-status, so jobs must be
+		// refreshed whenever allocations change.
+		w.updateJobs()
 	case api.TopicDeployment:
 		w.updateDeployments()
 	}

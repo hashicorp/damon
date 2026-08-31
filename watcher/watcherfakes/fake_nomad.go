@@ -34,6 +34,21 @@ type FakeNomad struct {
 		result1 []*models.Alloc
 		result2 error
 	}
+	ClusterStatsStub        func([]*models.Alloc, []*models.Job, *nomad.SearchOptions) (*models.ClusterStats, error)
+	clusterStatsMutex       sync.RWMutex
+	clusterStatsArgsForCall []struct {
+		arg1 []*models.Alloc
+		arg2 []*models.Job
+		arg3 *nomad.SearchOptions
+	}
+	clusterStatsReturns struct {
+		result1 *models.ClusterStats
+		result2 error
+	}
+	clusterStatsReturnsOnCall map[int]struct {
+		result1 *models.ClusterStats
+		result2 error
+	}
 	DeploymentsStub        func(*nomad.SearchOptions) ([]*models.Deployment, error)
 	deploymentsMutex       sync.RWMutex
 	deploymentsArgsForCall []struct {
@@ -59,6 +74,20 @@ type FakeNomad struct {
 	}
 	jobAllocsReturnsOnCall map[int]struct {
 		result1 []*models.Alloc
+		result2 error
+	}
+	JobStatusStub        func(string, *nomad.SearchOptions) (*models.JobStatus, error)
+	jobStatusMutex       sync.RWMutex
+	jobStatusArgsForCall []struct {
+		arg1 string
+		arg2 *nomad.SearchOptions
+	}
+	jobStatusReturns struct {
+		result1 *models.JobStatus
+		result2 error
+	}
+	jobStatusReturnsOnCall map[int]struct {
+		result1 *models.JobStatus
 		result2 error
 	}
 	JobsStub        func(*nomad.SearchOptions) ([]*models.Job, error)
@@ -101,20 +130,6 @@ type FakeNomad struct {
 	}
 	namespacesReturnsOnCall map[int]struct {
 		result1 []*models.Namespace
-		result2 error
-	}
-	JobStatusStub        func(string, *nomad.SearchOptions) (*models.JobStatus, error)
-	jobstatusMutex       sync.RWMutex
-	jobstatusArgsForCall []struct {
-		arg1 string
-		arg2 *nomad.SearchOptions
-	}
-	jobstatusReturns struct {
-		result1 *models.JobStatus
-		result2 error
-	}
-	jobstatusReturnsOnCall map[int]struct {
-		result1 *models.JobStatus
 		result2 error
 	}
 	StreamStub        func(nomad.Topics, uint64) (<-chan *api.Events, error)
@@ -266,6 +281,82 @@ func (fake *FakeNomad) AllocationsReturnsOnCall(i int, result1 []*models.Alloc, 
 	}{result1, result2}
 }
 
+func (fake *FakeNomad) ClusterStats(arg1 []*models.Alloc, arg2 []*models.Job, arg3 *nomad.SearchOptions) (*models.ClusterStats, error) {
+	var arg1Copy []*models.Alloc
+	if arg1 != nil {
+		arg1Copy = make([]*models.Alloc, len(arg1))
+		copy(arg1Copy, arg1)
+	}
+	var arg2Copy []*models.Job
+	if arg2 != nil {
+		arg2Copy = make([]*models.Job, len(arg2))
+		copy(arg2Copy, arg2)
+	}
+	fake.clusterStatsMutex.Lock()
+	ret, specificReturn := fake.clusterStatsReturnsOnCall[len(fake.clusterStatsArgsForCall)]
+	fake.clusterStatsArgsForCall = append(fake.clusterStatsArgsForCall, struct {
+		arg1 []*models.Alloc
+		arg2 []*models.Job
+		arg3 *nomad.SearchOptions
+	}{arg1Copy, arg2Copy, arg3})
+	stub := fake.ClusterStatsStub
+	fakeReturns := fake.clusterStatsReturns
+	fake.recordInvocation("ClusterStats", []interface{}{arg1Copy, arg2Copy, arg3})
+	fake.clusterStatsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeNomad) ClusterStatsCallCount() int {
+	fake.clusterStatsMutex.RLock()
+	defer fake.clusterStatsMutex.RUnlock()
+	return len(fake.clusterStatsArgsForCall)
+}
+
+func (fake *FakeNomad) ClusterStatsCalls(stub func([]*models.Alloc, []*models.Job, *nomad.SearchOptions) (*models.ClusterStats, error)) {
+	fake.clusterStatsMutex.Lock()
+	defer fake.clusterStatsMutex.Unlock()
+	fake.ClusterStatsStub = stub
+}
+
+func (fake *FakeNomad) ClusterStatsArgsForCall(i int) ([]*models.Alloc, []*models.Job, *nomad.SearchOptions) {
+	fake.clusterStatsMutex.RLock()
+	defer fake.clusterStatsMutex.RUnlock()
+	argsForCall := fake.clusterStatsArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FakeNomad) ClusterStatsReturns(result1 *models.ClusterStats, result2 error) {
+	fake.clusterStatsMutex.Lock()
+	defer fake.clusterStatsMutex.Unlock()
+	fake.ClusterStatsStub = nil
+	fake.clusterStatsReturns = struct {
+		result1 *models.ClusterStats
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeNomad) ClusterStatsReturnsOnCall(i int, result1 *models.ClusterStats, result2 error) {
+	fake.clusterStatsMutex.Lock()
+	defer fake.clusterStatsMutex.Unlock()
+	fake.ClusterStatsStub = nil
+	if fake.clusterStatsReturnsOnCall == nil {
+		fake.clusterStatsReturnsOnCall = make(map[int]struct {
+			result1 *models.ClusterStats
+			result2 error
+		})
+	}
+	fake.clusterStatsReturnsOnCall[i] = struct {
+		result1 *models.ClusterStats
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeNomad) Deployments(arg1 *nomad.SearchOptions) ([]*models.Deployment, error) {
 	fake.deploymentsMutex.Lock()
 	ret, specificReturn := fake.deploymentsReturnsOnCall[len(fake.deploymentsArgsForCall)]
@@ -391,6 +482,71 @@ func (fake *FakeNomad) JobAllocsReturnsOnCall(i int, result1 []*models.Alloc, re
 	}
 	fake.jobAllocsReturnsOnCall[i] = struct {
 		result1 []*models.Alloc
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeNomad) JobStatus(arg1 string, arg2 *nomad.SearchOptions) (*models.JobStatus, error) {
+	fake.jobStatusMutex.Lock()
+	ret, specificReturn := fake.jobStatusReturnsOnCall[len(fake.jobStatusArgsForCall)]
+	fake.jobStatusArgsForCall = append(fake.jobStatusArgsForCall, struct {
+		arg1 string
+		arg2 *nomad.SearchOptions
+	}{arg1, arg2})
+	stub := fake.JobStatusStub
+	fakeReturns := fake.jobStatusReturns
+	fake.recordInvocation("JobStatus", []interface{}{arg1, arg2})
+	fake.jobStatusMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeNomad) JobStatusCallCount() int {
+	fake.jobStatusMutex.RLock()
+	defer fake.jobStatusMutex.RUnlock()
+	return len(fake.jobStatusArgsForCall)
+}
+
+func (fake *FakeNomad) JobStatusCalls(stub func(string, *nomad.SearchOptions) (*models.JobStatus, error)) {
+	fake.jobStatusMutex.Lock()
+	defer fake.jobStatusMutex.Unlock()
+	fake.JobStatusStub = stub
+}
+
+func (fake *FakeNomad) JobStatusArgsForCall(i int) (string, *nomad.SearchOptions) {
+	fake.jobStatusMutex.RLock()
+	defer fake.jobStatusMutex.RUnlock()
+	argsForCall := fake.jobStatusArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeNomad) JobStatusReturns(result1 *models.JobStatus, result2 error) {
+	fake.jobStatusMutex.Lock()
+	defer fake.jobStatusMutex.Unlock()
+	fake.JobStatusStub = nil
+	fake.jobStatusReturns = struct {
+		result1 *models.JobStatus
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeNomad) JobStatusReturnsOnCall(i int, result1 *models.JobStatus, result2 error) {
+	fake.jobStatusMutex.Lock()
+	defer fake.jobStatusMutex.Unlock()
+	fake.JobStatusStub = nil
+	if fake.jobStatusReturnsOnCall == nil {
+		fake.jobStatusReturnsOnCall = make(map[int]struct {
+			result1 *models.JobStatus
+			result2 error
+		})
+	}
+	fake.jobStatusReturnsOnCall[i] = struct {
+		result1 *models.JobStatus
 		result2 error
 	}{result1, result2}
 }
@@ -590,71 +746,6 @@ func (fake *FakeNomad) NamespacesReturnsOnCall(i int, result1 []*models.Namespac
 	}{result1, result2}
 }
 
-func (fake *FakeNomad) JobStatusCallCount() int {
-	fake.jobstatusMutex.RLock()
-	defer fake.jobstatusMutex.RUnlock()
-	return len(fake.jobstatusArgsForCall)
-}
-
-func (fake *FakeNomad) JobStatusCalls(stub func(string, *nomad.SearchOptions) (*models.JobStatus, error)) {
-	fake.jobstatusMutex.Lock()
-	defer fake.jobstatusMutex.Unlock()
-	fake.JobStatusStub = stub
-}
-
-func (fake *FakeNomad) JobStatusForCall(i int) *nomad.SearchOptions {
-	fake.namespacesMutex.RLock()
-	defer fake.namespacesMutex.RUnlock()
-	argsForCall := fake.namespacesArgsForCall[i]
-	return argsForCall.arg1
-}
-
-func (fake *FakeNomad) JobStatus(arg1 string, arg2 *nomad.SearchOptions) (*models.JobStatus, error) {
-	fake.jobstatusMutex.Lock()
-	ret, specificReturn := fake.jobstatusReturnsOnCall[len(fake.jobstatusArgsForCall)]
-	fake.jobstatusArgsForCall = append(fake.jobstatusArgsForCall, struct {
-		arg1 string
-		arg2 *nomad.SearchOptions
-	}{arg1, arg2})
-	stub := fake.JobStatusStub
-	fakeReturns := fake.jobstatusReturns
-	fake.recordInvocation("JobStatus", []interface{}{arg1})
-	fake.jobstatusMutex.Unlock()
-	if stub != nil {
-		return stub(arg1, arg2)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	return fakeReturns.result1, fakeReturns.result2
-}
-
-func (fake *FakeNomad) JobStatusReturnsOnCall(i int, result1 *models.JobStatus, result2 error) {
-	fake.jobstatusMutex.Lock()
-	defer fake.jobstatusMutex.Unlock()
-	fake.JobStatusStub = nil
-	if fake.jobstatusReturnsOnCall == nil {
-		fake.jobstatusReturnsOnCall = make(map[int]struct {
-			result1 *models.JobStatus
-			result2 error
-		})
-	}
-	fake.jobstatusReturnsOnCall[i] = struct {
-		result1 *models.JobStatus
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeNomad) JobStatusReturns(result1 *models.JobStatus, result2 error) {
-	fake.jobstatusMutex.Lock()
-	defer fake.jobstatusMutex.Unlock()
-	fake.JobStatusStub = nil
-	fake.jobstatusReturns = struct {
-		result1 *models.JobStatus
-		result2 error
-	}{result1, result2}
-}
-
 func (fake *FakeNomad) Stream(arg1 nomad.Topics, arg2 uint64) (<-chan *api.Events, error) {
 	fake.streamMutex.Lock()
 	ret, specificReturn := fake.streamReturnsOnCall[len(fake.streamArgsForCall)]
@@ -788,26 +879,6 @@ func (fake *FakeNomad) TaskGroupsReturnsOnCall(i int, result1 []*models.TaskGrou
 func (fake *FakeNomad) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.addressMutex.RLock()
-	defer fake.addressMutex.RUnlock()
-	fake.allocationsMutex.RLock()
-	defer fake.allocationsMutex.RUnlock()
-	fake.deploymentsMutex.RLock()
-	defer fake.deploymentsMutex.RUnlock()
-	fake.jobAllocsMutex.RLock()
-	defer fake.jobAllocsMutex.RUnlock()
-	fake.jobsMutex.RLock()
-	defer fake.jobsMutex.RUnlock()
-	fake.logsMutex.RLock()
-	defer fake.logsMutex.RUnlock()
-	fake.namespacesMutex.RLock()
-	defer fake.namespacesMutex.RUnlock()
-	fake.streamMutex.RLock()
-	defer fake.streamMutex.RUnlock()
-	fake.taskGroupsMutex.RLock()
-	defer fake.taskGroupsMutex.RUnlock()
-	fake.jobstatusMutex.RLock()
-	defer fake.jobstatusMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

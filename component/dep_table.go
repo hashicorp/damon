@@ -5,6 +5,7 @@ package component
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -20,6 +21,7 @@ const (
 
 var (
 	TableHeaderDeployments = []string{
+		LabelLineNumber,
 		LabelID,
 		LabelJobID,
 		LabelNamespace,
@@ -100,21 +102,22 @@ func (d *DeploymentTable) reset() {
 }
 
 func (d *DeploymentTable) deploymentSelected(row, column int) {
-	deplID := d.Table.GetCellContent(row, 0)
+	deplID := d.Table.GetCellContent(row, 1)
 	d.Props.SelectDeployment(deplID)
 }
 
 func (d *DeploymentTable) renderRows() {
 	for i, dep := range d.Props.Data {
+		index := i + 1
+
 		row := []string{
+			strconv.Itoa(index),
 			dep.ID,
 			dep.JobID,
 			dep.Namespace,
 			dep.Status,
 			dep.StatusDescription,
 		}
-
-		index := i + 1
 
 		c := d.getCellColor(dep.Status)
 		d.Table.RenderRow(row, index, c)

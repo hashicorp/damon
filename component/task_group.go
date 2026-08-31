@@ -5,6 +5,7 @@ package component
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -20,6 +21,7 @@ const (
 
 var (
 	TableHeaderTaskGroups = []string{
+		LabelLineNumber,
 		LabelName,
 		LabelJobID,
 		LabelStarting,
@@ -94,7 +96,10 @@ func (t *TaskGroupTable) Render() error {
 
 func (t *TaskGroupTable) renderRows() {
 	for i, tg := range t.Props.Data {
+		index := i + 1
+
 		row := []string{
+			strconv.Itoa(index),
 			tg.Name,
 			tg.JobID,
 			fmt.Sprint(tg.Starting),
@@ -105,13 +110,11 @@ func (t *TaskGroupTable) renderRows() {
 			fmt.Sprint(tg.Lost),
 		}
 
-		index := i + 1
-
 		t.Table.RenderRow(row, index, tcell.ColorWhite)
 	}
 }
 
 func (t *TaskGroupTable) taskGroupSelected(row, column int) {
-	jobID := t.Table.GetCellContent(row, 0)
+	jobID := t.Table.GetCellContent(row, 1)
 	t.Props.SelectTaskGroup(jobID)
 }

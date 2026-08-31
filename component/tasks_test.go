@@ -146,10 +146,10 @@ func TestTasks_Happy(t *testing.T) {
 		row3, index3, c3 := fakeTable.RenderRowArgsForCall(2)
 		row4, index4, c4 := fakeTable.RenderRowArgsForCall(3)
 
-		expectedRow1 := []string{"task-1", "running", "docker", "docker-image", "msg"}
-		expectedRow2 := []string{"task-2", "failed", "docker", "docker-image", "msg"}
-		expectedRow3 := []string{"task-3", "dead", "docker", "docker-image", "msg"}
-		expectedRow4 := []string{"task-4", "pending", "docker", "docker-image", "msg"}
+		expectedRow1 := []string{"1", "task-1", "running", "docker", "docker-image", "msg"}
+		expectedRow2 := []string{"2", "task-2", "failed", "docker", "docker-image", "msg"}
+		expectedRow3 := []string{"3", "task-3", "dead", "docker", "docker-image", "msg"}
+		expectedRow4 := []string{"4", "task-4", "pending", "docker", "docker-image", "msg"}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)

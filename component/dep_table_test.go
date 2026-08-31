@@ -84,10 +84,10 @@ func TestDeploymentTable_Happy(t *testing.T) {
 		row3, index3, c3 := fakeTable.RenderRowArgsForCall(2)
 		row4, index4, c4 := fakeTable.RenderRowArgsForCall(3)
 
-		expectedRow1 := []string{"ichi", "saturn", "space", "running", "fine"}
-		expectedRow2 := []string{"ni", "neptun", "outerspace", "failed", "still fine"}
-		expectedRow3 := []string{"san", "jupiter", "outerspace", "pending", "wait"}
-		expectedRow4 := []string{"chi", "pluto", "outerspace", "completed", "..."}
+		expectedRow1 := []string{"1", "ichi", "saturn", "space", "running", "fine"}
+		expectedRow2 := []string{"2", "ni", "neptun", "outerspace", "failed", "still fine"}
+		expectedRow3 := []string{"3", "san", "jupiter", "outerspace", "pending", "wait"}
+		expectedRow4 := []string{"4", "chi", "pluto", "outerspace", "completed", "..."}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)

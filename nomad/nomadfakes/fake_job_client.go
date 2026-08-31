@@ -522,18 +522,6 @@ func (fake *FakeJobClient) SummaryReturnsOnCall(i int, result1 *api.JobSummary, 
 func (fake *FakeJobClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.allocationsMutex.RLock()
-	defer fake.allocationsMutex.RUnlock()
-	fake.deregisterMutex.RLock()
-	defer fake.deregisterMutex.RUnlock()
-	fake.infoMutex.RLock()
-	defer fake.infoMutex.RUnlock()
-	fake.listMutex.RLock()
-	defer fake.listMutex.RUnlock()
-	fake.registerMutex.RLock()
-	defer fake.registerMutex.RUnlock()
-	fake.summaryMutex.RLock()
-	defer fake.summaryMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

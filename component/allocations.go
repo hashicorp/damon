@@ -5,6 +5,7 @@ package component
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -20,6 +21,7 @@ const (
 
 var (
 	TableHeaderAllocations = []string{
+		LabelLineNumber,
 		LabelID,
 		LabelTaskGroup,
 		LabelJobID,
@@ -106,8 +108,10 @@ func (t *AllocationTable) reset() {
 
 func (t *AllocationTable) renderRows() {
 	for i, a := range t.Props.Data {
+		index := i + 1
 		hostAddr := fmt.Sprintf("%v", a.HostAddresses)
 		row := []string{
+			strconv.Itoa(index),
 			a.ID,
 			a.TaskGroup,
 			a.JobID,
@@ -118,8 +122,6 @@ func (t *AllocationTable) renderRows() {
 			a.NodeName,
 			a.DesiredStatus,
 		}
-
-		index := i + 1
 
 		c := t.getCellColor(a.DesiredStatus)
 		t.Table.RenderRow(row, index, c)
@@ -138,11 +140,11 @@ func (t *AllocationTable) getCellColor(status string) tcell.Color {
 }
 
 func (t *AllocationTable) allocationSelected(row, column int) {
-	allocID := t.Table.GetCellContent(row, 0)
+	allocID := t.Table.GetCellContent(row, 1)
 	t.Props.SelectAllocation(allocID)
 }
 
 func (t *AllocationTable) GetIDForSelection() string {
 	row, _ := t.Table.GetSelection()
-	return t.Table.GetCellContent(row, 0)
+	return t.Table.GetCellContent(row, 1)
 }

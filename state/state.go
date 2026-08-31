@@ -22,6 +22,9 @@ type State struct {
 	Logs        []byte
 	JobStatus   *models.JobStatus
 
+	ClusterStats    *models.ClusterStats
+	ClusterStatsErr error
+
 	SelectedNamespace string
 	SelectedRegion    string
 
@@ -47,9 +50,11 @@ type Filter struct {
 
 type Toggle struct {
 	JumpToJob    bool
+	GotoLine     bool
 	Search       bool
 	LogSearch    bool
 	LogHighlight bool
+	PrettyJSON   bool
 }
 
 type Elements struct {

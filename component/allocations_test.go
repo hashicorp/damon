@@ -84,8 +84,8 @@ func TestAllocation_Happy(t *testing.T) {
 
 		row1, index1, c1 := fakeTable.RenderRowArgsForCall(0)
 		row2, index2, c2 := fakeTable.RenderRowArgsForCall(1)
-		expectedRow1 := []string{"ichi", "tokio", "japan", "manga", "namespace", "[addr1]", "node", "node", "run"}
-		expectedRow2 := []string{"ni", "tokio", "japan", "manga", "namespace", "[addr2]", "node", "node", "stop"}
+		expectedRow1 := []string{"1", "ichi", "tokio", "japan", "manga", "namespace", "[addr1]", "node", "node", "run"}
+		expectedRow2 := []string{"2", "ni", "tokio", "japan", "manga", "namespace", "[addr2]", "node", "node", "stop"}
 
 		// It render the correct data for the rows
 		r.Equal(expectedRow1, row1)

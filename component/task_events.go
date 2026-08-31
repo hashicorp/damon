@@ -5,6 +5,7 @@ package component
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -22,6 +23,7 @@ const (
 
 var (
 	TableHeaderTaskEvents = []string{
+		LabelLineNumber,
 		LabelTime,
 		LabelType,
 		LabelMessage,
@@ -86,13 +88,14 @@ func (t *TaskEventsTable) Render() error {
 
 func (t *TaskEventsTable) renderRows() {
 	for i, e := range t.Props.Data {
+		index := i + 1
+
 		row := []string{
+			strconv.Itoa(index),
 			time.Unix(0, e.Time).Format(time.RFC3339),
 			e.Type,
 			e.DisplayMessage,
 		}
-
-		index := i + 1
 
 		t.Table.RenderRow(row, index, tcell.ColorWhite)
 	}
@@ -100,5 +103,5 @@ func (t *TaskEventsTable) renderRows() {
 
 func (t *TaskEventsTable) GetIDForSelection() string {
 	row, _ := t.Table.GetSelection()
-	return t.Table.GetCellContent(row, 0)
+	return t.Table.GetCellContent(row, 1)
 }

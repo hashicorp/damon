@@ -78,8 +78,6 @@ func (fake *FakeClient) AddressReturnsOnCall(i int, result1 string) {
 func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.addressMutex.RLock()
-	defer fake.addressMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

@@ -17,6 +17,7 @@ func (v *View) Logs(taskName string, allocID, source string) {
 
 	logStreamProps := v.components.LogStream.Props
 	logStreamProps.TaskName = taskName
+	logStreamProps.PrettyJSON = v.state.Toggle.PrettyJSON
 
 	// If the logstream contains data from a previous log stream
 	// remove it!

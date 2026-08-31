@@ -4,6 +4,8 @@
 package component
 
 import (
+	"strconv"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 
@@ -16,6 +18,7 @@ const TableTitleNamespaces = "Namespaces"
 
 var (
 	TableHeaderNamespaces = []string{
+		LabelLineNumber,
 		LabelName,
 		LabelDescription,
 	}
@@ -84,12 +87,14 @@ func (n *NamespaceTable) reset() {
 
 func (n *NamespaceTable) renderRows() {
 	for i, ns := range n.Props.Data {
+		index := i + 1
+
 		row := []string{
+			strconv.Itoa(index),
 			ns.Name,
 			ns.Description,
 		}
 
-		index := i + 1
 		n.Table.RenderRow(row, index, tcell.ColorWhite)
 	}
 }

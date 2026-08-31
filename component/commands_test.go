@@ -18,18 +18,24 @@ func TestCommands_Happy(t *testing.T) {
 	r := require.New(t)
 
 	textView := &componentfakes.FakeTextView{}
+	viewTextView := &componentfakes.FakeTextView{}
 	cmds := component.NewCommands()
 	cmds.TextView = textView
+	cmds.ViewTextView = viewTextView
 	cmds.Props.MainCommands = []string{"command1", "command2"}
 	cmds.Props.ViewCommands = []string{"subCmd1", "subCmd2"}
 
 	cmds.Bind(tview.NewFlex())
+	cmds.BindView(tview.NewFlex())
 
 	err := cmds.Render()
 	r.NoError(err)
 
 	text := textView.SetTextArgsForCall(0)
-	r.Equal(text, "command1\ncommand2\nsubCmd1\nsubCmd2")
+	r.Equal(text, "command1\ncommand2")
+
+	viewText := viewTextView.SetTextArgsForCall(0)
+	r.Equal(viewText, "subCmd1\nsubCmd2")
 }
 
 func TestCommands_Sad(t *testing.T) {

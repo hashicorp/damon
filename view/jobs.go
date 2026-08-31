@@ -136,6 +136,24 @@ func (v *View) inputJobs(event *tcell.EventKey) *tcell.EventKey {
 				}
 				return nil
 			}
+
+		case 's':
+			if v.Layout.Footer.HasFocus() || v.components.Search.InputField.Primitive().HasFocus() {
+				return event
+			}
+
+			v.components.JobTable.CycleSort()
+			v.components.JobTable.Render()
+			v.Draw()
+
+		case 'S':
+			if v.Layout.Footer.HasFocus() || v.components.Search.InputField.Primitive().HasFocus() {
+				return event
+			}
+
+			v.components.JobTable.FlipSortDirection()
+			v.components.JobTable.Render()
+			v.Draw()
 		}
 
 	}

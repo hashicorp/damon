@@ -13,7 +13,9 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/rivo/tview"
 
+	"github.com/hcjulz/damon/config"
 	"github.com/hcjulz/damon/nomad"
+	"github.com/hcjulz/damon/prometheus"
 	"github.com/hcjulz/damon/state"
 	"github.com/hcjulz/damon/styles"
 	"github.com/hcjulz/damon/version"
@@ -44,6 +46,12 @@ func main() {
 		os.Exit(0)
 	}
 
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Println("failed to load config: ", err)
+		os.Exit(1)
+	}
+
 	nomadClient, err := nomad.New(nomad.Default)
 	if err != nil {
 		fmt.Println("failed to generate Nomad client: ", err)
@@ -56,7 +64,7 @@ func main() {
 	selections := component.NewSelections(state)
 	selectorModal := component.NewSelectorModal()
 	commands := component.NewCommands()
-	logo := component.NewLogo()
+	clusterStats := component.NewClusterStats()
 	jobs := component.NewJobsTable()
 	jobStatus := component.NewJobStatus()
 	depl := component.NewDeploymentTable()
@@ -67,6 +75,7 @@ func main() {
 	taskTable := component.NewTaskTable()
 	logs := component.NewLogger()
 	jumpToJob := component.NewJumpToJob()
+	gotoLine := component.NewGotoLine()
 	logSearch := component.NewSearchField("/")
 	logHighlight := component.NewSearchField("highlight")
 	errorComp := component.NewError()
@@ -84,7 +93,7 @@ func main() {
 		Selections:      selections,
 		SelectorModal:   selectorModal,
 		Commands:        commands,
-		Logo:            logo,
+		ClusterStats:    clusterStats,
 		JobTable:        jobs,
 		JobStatus:       jobStatus,
 		DeploymentTable: depl,
@@ -96,6 +105,7 @@ func main() {
 		LogStream:       logs,
 		LogHighlight:    logHighlight,
 		JumpToJob:       jumpToJob,
+		GotoLine:        gotoLine,
 		Error:           errorComp,
 		Info:            info,
 		Failure:         failure,
@@ -104,10 +114,16 @@ func main() {
 	}
 
 	watcher := watcher.NewWatcher(state, nomadClient, refreshIntervalDefault)
+	switch cfg.PrometheusPlacement {
+	case config.PrometheusPlacementExternal:
+		watcher.SetPrometheusClient(prometheus.New(cfg.PrometheusURL))
+	case config.PrometheusPlacementNomad:
+		watcher.SetPrometheusDiscovery(cfg.PrometheusJob, cfg.PrometheusPortLabel)
+	}
 	go watcher.Watch()
 
 	view := view.New(components, watcher, nomadClient, state)
-	view.Init(version.GetHumanVersion())
+	view.Init(version.GetHumanVersion(), cfg.ClusterStatsRefreshInterval)
 
 	err = view.Layout.Container.Run()
 	if err != nil {

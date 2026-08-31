@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	LabelLineNumber        = "#"
 	LabelID                = "ID"
 	LabelJobID             = "JobID"
 	LabelType              = "Type"
@@ -29,6 +30,7 @@ const (
 	LabelTaskGroup         = "TaskGroup"
 	LabelTime              = "Time"
 	LabelMessage           = "Message"
+	LabelReady             = "Ready"
 
 	LabelCPU       = "CPU"
 	LabelMemory    = "Memory"

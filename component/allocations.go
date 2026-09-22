@@ -93,7 +93,7 @@ func (t *AllocationTable) Render() error {
 	t.Table.RenderHeader(TableHeaderAllocations)
 	t.renderRows()
 
-	t.Table.SetTitle(fmt.Sprintf("%s (Job: %s)", TableTitleAllocations, t.Props.JobID))
+	t.Table.SetTitle("%s (Job: %s)", TableTitleAllocations, t.Props.JobID)
 	t.slot.AddItem(t.Table.Primitive(), 0, 1, false)
 
 	return nil

@@ -4,8 +4,6 @@
 package component
 
 import (
-	"fmt"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 
@@ -101,7 +99,7 @@ func (t *TaskTable) Render() error {
 	t.Table.RenderHeader(TableHeaderTasks)
 	t.renderRows()
 
-	t.Table.SetTitle(fmt.Sprintf("%s (Allocation: %s)", TableTitleTasks, t.Props.AllocationID))
+	t.Table.SetTitle("%s (Allocation: %s)", TableTitleTasks, t.Props.AllocationID)
 	t.slot.AddItem(t.Table.Primitive(), 0, 1, false)
 
 	return nil

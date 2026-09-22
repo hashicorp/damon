@@ -10,7 +10,7 @@
 
 # devbuild compiles the binary
 # -----------------------------------
-FROM golang:1.19.1 AS devbuild
+FROM golang:1.27.1 AS devbuild
 
 # Disable CGO to make sure we build static binaries
 ENV CGO_ENABLED=0
@@ -22,7 +22,7 @@ RUN go build -o damon ./cmd/damon
 
 # dev runs the binary from devbuild
 # -----------------------------------
-FROM alpine:3.15 AS dev
+FROM alpine:3.24.2 AS dev
 
 COPY --from=devbuild /build/damon /bin/
 COPY ./scripts/docker-entrypoint.sh /
@@ -34,7 +34,7 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 #   Release images.
 # ===================================
 
-FROM alpine:3.15 AS release
+FROM alpine:3.24.2 AS release
 
 ARG PRODUCT_NAME=damon
 ARG PRODUCT_VERSION

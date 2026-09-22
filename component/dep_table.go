@@ -4,8 +4,6 @@
 package component
 
 import (
-	"fmt"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 
@@ -85,7 +83,7 @@ func (d *DeploymentTable) Render() error {
 		return nil
 	}
 
-	d.Table.SetTitle(fmt.Sprintf("%s (%s)", TableTitleDeployments, d.Props.Namespace))
+	d.Table.SetTitle("%s (%s)", TableTitleDeployments, d.Props.Namespace)
 
 	d.Table.RenderHeader(TableHeaderDeployments)
 	d.renderRows()

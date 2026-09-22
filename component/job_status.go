@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/rivo/tview"
 
 	"github.com/hcjulz/damon/models"
@@ -58,30 +60,54 @@ func (jobStatus *JobStatus) Render() error {
 		applyModifiers(textView, jobStatus.Props.Data.ID)
 	})
 
+	infoData, err := jobStatus.renderInfoData()
+	if err != nil {
+		return err
+	}
+
+	summary, err := jobStatus.renderSummary()
+	if err != nil {
+		return err
+	}
+
+	latestDeployment, err := jobStatus.renderLatestDeployment()
+	if err != nil {
+		return err
+	}
+
+	deployments, err := jobStatus.renderDeployments()
+	if err != nil {
+		return err
+	}
+
+	allocs, err := jobStatus.renderAllocs()
+	if err != nil {
+		return err
+	}
+
 	var jobStatusText []string
 	jobStatusText = append(jobStatusText,
 		"\n",
-		jobStatus.renderInfoData(),
+		infoData,
 		fmt.Sprintf("\n  %s\n", LabelStatusSummary),
-		jobStatus.renderSummary(),
+		summary,
 		fmt.Sprintf("\n  %s\n", LabelLatestDeployment),
-		jobStatus.renderLatestDeployment(),
+		latestDeployment,
 		fmt.Sprintf("\n  %s\n", LabelDeployed),
-		jobStatus.renderDeployments(),
+		deployments,
 		fmt.Sprintf("\n  %s\n", LabelAllocations),
-		jobStatus.renderAllocs())
+		allocs)
 
 	jobStatus.TextView.SetText(strings.Join(jobStatusText, ""))
 	jobStatus.slot.AddItem(jobStatus.TextView.Primitive(), 0, 1, true)
 	return nil
 }
 
-func (jobStatus *JobStatus) renderInfoData() string {
+func (jobStatus *JobStatus) renderInfoData() (string, error) {
 	j := jobStatus.Props.Data
 
 	tableString := &strings.Builder{}
-	tableWriter := tablewriter.NewWriter(tableString)
-	format(tableWriter)
+	tableWriter := newTable(tableString)
 
 	frmt := func(value interface{}) string {
 		return fmt.Sprintf("= %s", value)
@@ -99,18 +125,23 @@ func (jobStatus *JobStatus) renderInfoData() string {
 		{LabelPeriodic, frmt(fmt.Sprint(j.Periodic))},
 		{LabelParameterized, frmt(fmt.Sprint(j.Parameterized))},
 	}
-	tableWriter.AppendBulk(infoData)
-	tableWriter.Render()
-	return tableString.String()
+	if err := tableWriter.Bulk(infoData); err != nil {
+		return "", err
+	}
+
+	if err := tableWriter.Render(); err != nil {
+		return "", err
+	}
+
+	return tableString.String(), nil
 }
 
-func (jobStatus *JobStatus) renderSummary() string {
+func (jobStatus *JobStatus) renderSummary() (string, error) {
 	tasks := jobStatus.Props.Data.TaskGroups
 
 	tableString := &strings.Builder{}
-	tableWriter := tablewriter.NewWriter(tableString)
-	format(tableWriter)
-	tableWriter.SetHeader([]string{LabelTaskGroup, LabelQueued, LabelStarting, LabelRunning, LabelFailed, LabelComplete, LabelLost})
+	tableWriter := newTable(tableString)
+	tableWriter.Header([]string{LabelTaskGroup, LabelQueued, LabelStarting, LabelRunning, LabelFailed, LabelComplete, LabelLost})
 
 	for _, tg := range tasks {
 		row := []string{
@@ -122,23 +153,28 @@ func (jobStatus *JobStatus) renderSummary() string {
 			fmt.Sprint(tg.Complete),
 			fmt.Sprint(tg.Lost),
 		}
-		tableWriter.Append(row)
+		if err := tableWriter.Append(row); err != nil {
+			return "", err
+		}
 	}
-	tableWriter.Render()
-	return tableString.String()
+
+	if err := tableWriter.Render(); err != nil {
+		return "", err
+	}
+
+	return tableString.String(), nil
 }
 
-func (jobStatus *JobStatus) renderLatestDeployment() string {
+func (jobStatus *JobStatus) renderLatestDeployment() (string, error) {
 	tgs := jobStatus.Props.Data.TaskGroupStatus
 
 	if len(tgs) <= 0 {
-		return ""
+		return "", nil
 	}
 
 	ts := tgs[0]
 	tableString := &strings.Builder{}
-	tableWriter := tablewriter.NewWriter(tableString)
-	format(tableWriter)
+	tableWriter := newTable(tableString)
 
 	frmt := func(value interface{}) string {
 		return fmt.Sprintf("= %s", value)
@@ -149,19 +185,24 @@ func (jobStatus *JobStatus) renderLatestDeployment() string {
 		{LabelStatus, frmt(ts.Status)},
 		{LabelStatusDescriptionLong, frmt(ts.StatusDescription)},
 	}
-	tableWriter.AppendBulk(infoData)
-	tableWriter.Render()
-	return tableString.String()
+	if err := tableWriter.Bulk(infoData); err != nil {
+		return "", err
+	}
+
+	if err := tableWriter.Render(); err != nil {
+		return "", err
+	}
+
+	return tableString.String(), nil
 }
 
-func (jobStatus *JobStatus) renderDeployments() string {
+func (jobStatus *JobStatus) renderDeployments() (string, error) {
 	tgs := jobStatus.Props.Data.TaskGroupStatus
 
 	tableString := &strings.Builder{}
-	tableWriter := tablewriter.NewWriter(tableString)
-	format(tableWriter)
+	tableWriter := newTable(tableString)
 
-	tableWriter.SetHeader([]string{LabelTaskGroup, LabelDesired, LabelPlaced, LabelHealthy, LabelUnhealthy, LabelProgressDeadline})
+	tableWriter.Header([]string{LabelTaskGroup, LabelDesired, LabelPlaced, LabelHealthy, LabelUnhealthy, LabelProgressDeadline})
 
 	for _, t := range tgs {
 		row := []string{
@@ -172,20 +213,25 @@ func (jobStatus *JobStatus) renderDeployments() string {
 			fmt.Sprint(t.Unhealthy),
 			fmt.Sprint(t.ProgressDeadline),
 		}
-		tableWriter.Append(row)
+		if err := tableWriter.Append(row); err != nil {
+			return "", err
+		}
 	}
-	tableWriter.Render()
-	return tableString.String()
+
+	if err := tableWriter.Render(); err != nil {
+		return "", err
+	}
+
+	return tableString.String(), nil
 }
 
-func (jobStatus *JobStatus) renderAllocs() string {
+func (jobStatus *JobStatus) renderAllocs() (string, error) {
 	tgs := jobStatus.Props.Data.Allocations
 
 	tableString := &strings.Builder{}
-	tableWriter := tablewriter.NewWriter(tableString)
-	format(tableWriter)
+	tableWriter := newTable(tableString)
 
-	tableWriter.SetHeader([]string{LabelID, LabelNodeID, LabelTaskGroup, LabelVersion, LabelDesired, LabelStatus, LabelCreated, LabelModified})
+	tableWriter.Header([]string{LabelID, LabelNodeID, LabelTaskGroup, LabelVersion, LabelDesired, LabelStatus, LabelCreated, LabelModified})
 
 	for _, t := range tgs {
 		row := []string{
@@ -198,23 +244,33 @@ func (jobStatus *JobStatus) renderAllocs() string {
 			fmt.Sprintf("%s ago", time.Since(t.Created).Round(time.Second)),
 			fmt.Sprintf("%s ago", time.Since(t.Modified).Round(time.Second)),
 		}
-		tableWriter.Append(row)
+		if err := tableWriter.Append(row); err != nil {
+			return "", err
+		}
 	}
-	tableWriter.Render()
-	return tableString.String()
+
+	if err := tableWriter.Render(); err != nil {
+		return "", err
+	}
+
+	return tableString.String(), nil
 }
 
-func format(tw *tablewriter.Table) {
-	tw.SetBorder(false)
-	tw.SetAutoWrapText(false)
-	tw.SetAutoFormatHeaders(false)
-	tw.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	tw.SetAlignment(tablewriter.ALIGN_LEFT)
-	tw.SetCenterSeparator("")
-	tw.SetColumnSeparator("")
-	tw.SetRowSeparator("")
-	tw.SetHeaderLine(false)
-	tw.SetTablePadding("\t")
+// newTable returns a borderless, left-aligned table without separators,
+// headers kept verbatim and content never wrapped.
+func newTable(w *strings.Builder) *tablewriter.Table {
+	cells := tw.CellConfig{
+		Formatting: tw.CellFormatting{AutoFormat: tw.Off, AutoWrap: tw.WrapNone},
+		Alignment:  tw.CellAlignment{Global: tw.AlignLeft},
+	}
+
+	return tablewriter.NewTable(w,
+		tablewriter.WithRenderer(renderer.NewBlueprint(tw.Rendition{
+			Borders:  tw.BorderNone,
+			Settings: tw.Settings{Lines: tw.LinesNone, Separators: tw.SeparatorsNone},
+		})),
+		tablewriter.WithConfig(tablewriter.Config{Header: cells, Row: cells}),
+	)
 }
 
 func applyModifiers(t *tview.TextView, jobID string) {

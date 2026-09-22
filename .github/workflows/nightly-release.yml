@@ -17,11 +17,11 @@ jobs:
     uses: ./.github/workflows/build.yml
   github-release:
     needs: build-artifacts
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Download built artifacts
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: out/
       # Set BUILD_OUTPUT_LIST to out\<project>-<version>.<fileext>\*,out\...
@@ -33,12 +33,12 @@ jobs:
           echo "BUILD_OUTPUT_LIST=$(cat tmp2.txt | tr '\n' ',' | perl -ple 'chop')" >> $GITHUB_ENV
           rm -rf tmp.txt && rm -rf tmp2.txt
       - name: Advance nightly tag
-        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             try {
-                await github.git.deleteRef({
+                await github.rest.git.deleteRef({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   ref: "tags/nightly"
@@ -46,7 +46,7 @@ jobs:
             } catch (e) {
               console.log("Warning: The nightly tag doesn't exist yet, so there's nothing to do. Trace: " + e)
             }
-            await github.git.createRef({
+            await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: "refs/tags/nightly",
@@ -56,7 +56,7 @@ jobs:
       # If a release with this name already exists, it will overwrite the existing data
       - name: Create a nightly GitHub prerelease
         id: create_prerelease
-        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # v1.12.0
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           name: nightly
           artifacts: "${{ env.BUILD_OUTPUT_LIST }}"
@@ -68,7 +68,7 @@ jobs:
           draft: false
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish nightly GitHub prerelease
-        uses: eregon/publish-release@46913fa2b3f7edc7345ae3c17f6d1b093a54916d # v1.0.5
+        uses: eregon/publish-release@01df127f5e9a3c26935118e22e738d95b59d10ce # v1.0.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -79,11 +79,14 @@ jobs:
       - build-artifacts
       - github-release
     if: always() && (needs.build-artifacts.result == 'failure' || needs.github-release.result == 'failure')
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Send slack notification on failure
-        uses: slackapi/slack-github-action@e28cf165c92ffef168d23c5c9000cffc8a25e117 # v1.24.0
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
         with:
+          # the slack webhook url links to #feed-nomad-releases
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
           payload: |
             {
               "text": ":x::moon::nomad-sob: Damon Nightly Release *FAILED*",
@@ -117,7 +120,3 @@ jobs:
                 }
               ]
             }
-        env:
-          # the slack webhook url links to #feed-nomad-releases
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

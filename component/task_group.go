@@ -83,7 +83,7 @@ func (t *TaskGroupTable) Render() error {
 	}
 
 	t.Table.SetSelectedFunc(t.taskGroupSelected)
-	t.Table.SetTitle(fmt.Sprintf("%s (%s)", TableTitleTaskGroups, t.Props.JobID))
+	t.Table.SetTitle("%s (%s)", TableTitleTaskGroups, t.Props.JobID)
 
 	t.Table.RenderHeader(TableHeaderTaskGroups)
 	t.renderRows()

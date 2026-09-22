@@ -4,7 +4,6 @@
 package component
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -75,7 +74,7 @@ func (t *TaskEventsTable) Render() error {
 		return nil
 	}
 
-	t.Table.SetTitle(fmt.Sprintf("%s (%s)", TableTitleTaskEvents, t.Props.AllocID))
+	t.Table.SetTitle("%s (%s)", TableTitleTaskEvents, t.Props.AllocID)
 
 	t.Table.RenderHeader(TableHeaderTaskEvents)
 	t.renderRows()

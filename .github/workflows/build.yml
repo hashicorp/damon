@@ -224,7 +224,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Docker Build (Action)
-        uses: hashicorp/actions-docker-build@v1
+        uses: hashicorp/actions-docker-build@v2
         with:
           smoke_test: |
             TEST_VERSION="$(docker run "${IMAGE_NAME}" --version | awk '/Damon/{print $2}')"
